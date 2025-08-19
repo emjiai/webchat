@@ -1,12 +1,11 @@
 'use client';
 
-
+import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 import {
-  Palette, MessageSquare, Mic, Brain, Layout, Sliders,
-  Monitor, Smartphone, Tablet, Globe, ChevronRight
+  Palette, MessageSquare, Brain, Layout
 } from 'lucide-react';
-import { WidgetConfig } from '@/types';
+import { WidgetConfig } from '@/types/widget';
 
 interface WidgetCustomizerProps {
   config: WidgetConfig;
@@ -14,6 +13,10 @@ interface WidgetCustomizerProps {
 }
 
 export default function WidgetCustomizer({ config, onConfigChange }: WidgetCustomizerProps) {
+  // Helpers to update nested theme safely
+  const updateTheme = (partial: Partial<WidgetConfig['theme']>) =>
+    onConfigChange({ theme: { ...config.theme, ...partial } });
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Appearance Settings */}
@@ -26,19 +29,47 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
         </div>
         
         <div className="space-y-6">
+          {/* Theme Presets (replaces invalid select on object) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Theme
+              Theme Preset
             </label>
-            <select
-              value={config.theme}
-              onChange={(e) => onConfigChange({ theme: e.target.value as any })}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="custom">Custom</option>
-            </select>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => onConfigChange({
+                  theme: {
+                    primaryColor: '#3b82f6',
+                    secondaryColor: '#10b981',
+                    backgroundColor: '#ffffff',
+                    textColor: '#1f2937',
+                    fontFamily: 'Inter'
+                  }
+                })}
+                className="px-3 py-2 rounded-lg border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+              >
+                Light
+              </button>
+              <button
+                onClick={() => onConfigChange({
+                  theme: {
+                    primaryColor: '#6366f1',
+                    secondaryColor: '#8b5cf6',
+                    backgroundColor: '#0f172a',
+                    textColor: '#f1f5f9',
+                    fontFamily: 'Inter'
+                  }
+                })}
+                className="px-3 py-2 rounded-lg border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+              >
+                Dark
+              </button>
+              <button
+                onClick={() => onConfigChange({ theme: { ...config.theme } })}
+                className="px-3 py-2 rounded-lg border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+              >
+                Custom
+              </button>
+            </div>
           </div>
           
           <div>
@@ -46,11 +77,11 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
               Primary Color
             </label>
             <div className="relative">
-              <HexColorPicker color={config.primaryColor} onChange={(color) => onConfigChange({ primaryColor: color })} />
+              <HexColorPicker color={config.theme.primaryColor} onChange={(color) => updateTheme({ primaryColor: color })} />
               <input
                 type="text"
-                value={config.primaryColor}
-                onChange={(e) => onConfigChange({ primaryColor: e.target.value })}
+                value={config.theme.primaryColor}
+                onChange={(e) => updateTheme({ primaryColor: e.target.value })}
                 className="mt-2 w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
               />
             </div>
@@ -113,8 +144,8 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
               Default LLM Provider
             </label>
             <select
-              value={config.defaultLLM}
-              onChange={(e) => onConfigChange({ defaultLLM: e.target.value as any })}
+              value={config.defaultTextModel}
+              onChange={(e) => onConfigChange({ defaultTextModel: e.target.value as WidgetConfig['defaultTextModel'] })}
               className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"
             >
               <option value="gpt">GPT</option>
@@ -164,20 +195,20 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
               Enable Voice
             </label>
             <button
-              onClick={() => onConfigChange({ enableVoice: !config.enableVoice })}
+              onClick={() => onConfigChange({ voiceEnabled: !config.voiceEnabled })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                config.enableVoice ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                config.voiceEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  config.enableVoice ? 'translate-x-6' : 'translate-x-1'
+                  config.voiceEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
           </div>
           
-          {config.enableVoice && (
+          {config.voiceEnabled && (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -185,7 +216,7 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
                 </label>
                 <select
                   value={config.defaultVoiceEngine}
-                  onChange={(e) => onConfigChange({ defaultVoiceEngine: e.target.value as any })}
+                  onChange={(e) => onConfigChange({ defaultVoiceEngine: e.target.value as WidgetConfig['defaultVoiceEngine'] })}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"
                 >
                   <option value="openai">OpenAI</option>
@@ -198,14 +229,14 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
                   Auto-play Responses
                 </label>
                 <button
-                  onClick={() => onConfigChange({ voiceAutoPlay: !config.voiceAutoPlay })}
+                  onClick={() => onConfigChange({ autoPlayResponses: !config.autoPlayResponses })}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    config.voiceAutoPlay ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                    config.autoPlayResponses ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      config.voiceAutoPlay ? 'translate-x-6' : 'translate-x-1'
+                      config.autoPlayResponses ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>
@@ -220,13 +251,13 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
                   min="0.5"
                   max="2"
                   step="0.1"
-                  value={config.speechRate}
-                  onChange={(e) => onConfigChange({ speechRate: Number(e.target.value) })}
+                  value={config.voiceSpeed}
+                  onChange={(e) => onConfigChange({ voiceSpeed: Number(e.target.value) })}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>Slow</span>
-                  <span>{config.speechRate}x</span>
+                  <span>{config.voiceSpeed}x</span>
                   <span>Fast</span>
                 </div>
               </div>
@@ -238,20 +269,20 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
               Enable RAG
             </label>
             <button
-              onClick={() => onConfigChange({ enableRAG: !config.enableRAG })}
+              onClick={() => onConfigChange({ ragEnabled: !config.ragEnabled })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                config.enableRAG ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                config.ragEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  config.enableRAG ? 'translate-x-6' : 'translate-x-1'
+                  config.ragEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
           </div>
           
-          {config.enableRAG && (
+          {config.ragEnabled && (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -259,8 +290,8 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
                 </label>
                 <input
                   type="number"
-                  value={config.maxRetrievalResults}
-                  onChange={(e) => onConfigChange({ maxRetrievalResults: Number(e.target.value) })}
+                  value={config.maxRetrievedDocs}
+                  onChange={(e) => onConfigChange({ maxRetrievedDocs: Number(e.target.value) })}
                   min="1"
                   max="10"
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"
@@ -294,14 +325,14 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
               Stream Responses
             </label>
             <button
-              onClick={() => onConfigChange({ streamResponses: !config.streamResponses })}
+              onClick={() => onConfigChange({ streamingEnabled: !config.streamingEnabled })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                config.streamResponses ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                config.streamingEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  config.streamResponses ? 'translate-x-6' : 'translate-x-1'
+                  config.streamingEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -497,8 +528,8 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
             </label>
             <input
               type="text"
-              value={config.avatarUrl}
-              onChange={(e) => onConfigChange({ avatarUrl: e.target.value })}
+              value={config.botAvatar}
+              onChange={(e) => onConfigChange({ botAvatar: e.target.value })}
               placeholder="https://example.com/avatar.png"
               className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"
             />
@@ -509,8 +540,8 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
               Widget Mode
             </label>
             <select
-              value={config.mode}
-              onChange={(e) => onConfigChange({ mode: e.target.value as any })}
+              value={config.displayMode}
+              onChange={(e) => onConfigChange({ displayMode: e.target.value as WidgetConfig['displayMode'] })}
               className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"
             >
               <option value="popup">Popup</option>
@@ -525,7 +556,7 @@ export default function WidgetCustomizer({ config, onConfigChange }: WidgetCusto
             </label>
             <select
               value={config.position}
-              onChange={(e) => onConfigChange({ position: e.target.value as any })}
+              onChange={(e) => onConfigChange({ position: e.target.value as WidgetConfig['position'] })}
               className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"
             >
               <option value="bottom-right">Bottom Right</option>
