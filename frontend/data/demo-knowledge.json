@@ -1,0 +1,104 @@
+{
+    "documents": [
+      {
+        "id": "doc-001",
+        "title": "Product Overview - AI Chatbot Widget",
+        "content": "Our AI Chatbot Widget is a cutting-edge solution that combines voice and text capabilities with advanced artificial intelligence. It supports multiple AI models including GPT-4, Claude, Gemini, Grok, and DeepSeek. The widget features real-time voice conversations using OpenAI and Eleven Labs APIs, making it perfect for businesses looking to enhance customer engagement. With full customization options, responsive design, and easy embedding, it's the ideal solution for modern websites.",
+        "metadata": {
+          "category": "product",
+          "tags": ["overview", "features", "ai", "chatbot"],
+          "lastUpdated": "2024-01-15"
+        }
+      },
+      {
+        "id": "doc-002",
+        "title": "Voice Features and Capabilities",
+        "content": "The voice feature set includes real-time speech-to-text conversion, natural text-to-speech synthesis, and support for multiple voice engines. Users can switch between OpenAI's voice API and Eleven Labs for optimal quality. The system supports adjustable playback speed, volume control, and various voice styles. Voice messages are seamlessly integrated into the chat flow, with visual indicators showing when the system is listening or speaking.",
+        "metadata": {
+          "category": "features",
+          "tags": ["voice", "speech", "audio", "tts", "stt"],
+          "lastUpdated": "2024-01-14"
+        }
+      },
+      {
+        "id": "doc-003",
+        "title": "Pricing Plans and Options",
+        "content": "We offer three comprehensive pricing tiers. The Starter Plan at $29/month includes basic features and 1,000 messages. The Professional Plan at $99/month provides advanced AI models, voice capabilities, and 10,000 messages. Our Enterprise Plan offers custom pricing with unlimited messages, dedicated support, and custom integrations. All plans include a 14-day free trial with no credit card required. Volume discounts are available for annual subscriptions.",
+        "metadata": {
+          "category": "pricing",
+          "tags": ["plans", "costs", "subscription", "trial"],
+          "lastUpdated": "2024-01-13"
+        }
+      },
+      {
+        "id": "doc-004",
+        "title": "Installation and Integration Guide",
+        "content": "Installing the chatbot widget is straightforward. Simply configure your preferences in the dashboard, copy the generated embed code, and paste it into your website's HTML. We support multiple installation methods including script tags for static sites, NPM packages for React/Vue/Angular applications, WordPress plugins, and Shopify apps. The widget loads asynchronously to ensure optimal page performance and is compatible with all modern browsers.",
+        "metadata": {
+          "category": "documentation",
+          "tags": ["installation", "integration", "embed", "setup"],
+          "lastUpdated": "2024-01-12"
+        }
+      },
+      {
+        "id": "doc-005",
+        "title": "Customization Options",
+        "content": "Extensive customization options allow you to match the widget to your brand identity. Customize colors including primary, secondary, background, and text colors. Choose from three display modes: popup, inline, or fullscreen. Position the widget in any corner of your page. Adjust the size from small to large. Personalize the welcome message, bot name, and avatar. Configure voice settings, select default AI models, and enable or disable specific features.",
+        "metadata": {
+          "category": "customization",
+          "tags": ["design", "branding", "appearance", "configuration"],
+          "lastUpdated": "2024-01-11"
+        }
+      },
+      {
+        "id": "doc-006",
+        "title": "RAG (Retrieval-Augmented Generation) System",
+        "content": "Our RAG system enhances response accuracy by retrieving relevant information from your knowledge base. When enabled, the system searches through uploaded documents to find contextually relevant information before generating responses. This ensures accurate, citation-backed answers. The system supports multiple document formats, automatic indexing, and relevance scoring. Citations are displayed with each response, allowing users to verify information sources.",
+        "metadata": {
+          "category": "features",
+          "tags": ["rag", "retrieval", "accuracy", "citations"],
+          "lastUpdated": "2024-01-10"
+        }
+      },
+      {
+        "id": "doc-007",
+        "title": "Security and Privacy",
+        "content": "We prioritize security and privacy with end-to-end encryption for all communications. Data is stored in compliance with GDPR and CCPA regulations. User conversations are never shared with third parties. Optional analytics can be completely disabled. We use secure WebSocket connections for real-time features. All voice data is processed securely through encrypted channels. Regular security audits ensure the highest standards of data protection.",
+        "metadata": {
+          "category": "security",
+          "tags": ["privacy", "encryption", "gdpr", "compliance"],
+          "lastUpdated": "2024-01-09"
+        }
+      },
+      {
+        "id": "doc-008",
+        "title": "API and Backend Integration",
+        "content": "The widget is designed to work seamlessly with FastAPI backends. It supports RESTful APIs and WebSocket connections for real-time features. Authentication can be handled through API keys or OAuth. The system includes webhook support for custom integrations. Response caching improves performance and reduces API calls. Rate limiting ensures fair usage. Custom endpoints can be configured for specialized functionality.",
+        "metadata": {
+          "category": "technical",
+          "tags": ["api", "backend", "fastapi", "integration"],
+          "lastUpdated": "2024-01-08"
+        }
+      },
+      {
+        "id": "doc-009",
+        "title": "Analytics and Insights",
+        "content": "Comprehensive analytics provide insights into user interactions. Track message volume, response times, and user satisfaction. Monitor which features are most used. Analyze conversation flows to identify improvement areas. Export data for external analysis. Real-time dashboards show current activity. Historical reports help track trends over time. Custom events can be tracked for specific business metrics.",
+        "metadata": {
+          "category": "analytics",
+          "tags": ["metrics", "insights", "reporting", "dashboard"],
+          "lastUpdated": "2024-01-07"
+        }
+      },
+      {
+        "id": "doc-010",
+        "title": "Support and Resources",
+        "content": "We provide comprehensive support through multiple channels. Email support is available for all plans with response times based on plan level. Professional and Enterprise plans include priority support. Extensive documentation covers all features and use cases. Video tutorials demonstrate common implementations. A community forum allows users to share experiences and solutions. Regular webinars provide training on new features. A dedicated support portal tracks all inquiries.",
+        "metadata": {
+          "category": "support",
+          "tags": ["help", "documentation", "tutorials", "community"],
+          "lastUpdated": "2024-01-06"
+        }
+      }
+    ]
+  }
