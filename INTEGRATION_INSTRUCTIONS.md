@@ -1,186 +1,273 @@
 # AI Chatbot Widget Integration Instructions
 
 ## 🎯 Goal
-Add the AI chatbot widget icon button to your WorkerBull app (running on localhost:3000).
+Embed named AI chatbots with full features (voice, multiple AI models, RAG, etc.) on any website.
 
 ## ✅ What's Been Done
 
-1. **Webchat project updated**:
-   - Changed to run on port 3001 (package.json updated)
-   - Created widget bundle files in `frontend/public/widget/`:
-     - `chatbot.js` - Widget JavaScript code
-     - `chatbot.css` - Widget styles
+1. **Multi-Chatbot System**:
+   - Create multiple named chatbots for different websites/purposes
+   - Each chatbot has independent configuration (theme, AI models, voice, etc.)
+   - Dashboard management interface for all chatbots
+   - Real-time configuration sync between dashboard and embedded widgets
 
-2. **Files created for your WorkerBull app**:
-   - `ChatWidgetWrapper.tsx` - Component to load the widget
-   - `layout-fixed.tsx` - Example of fixed layout.tsx
+2. **Advanced Widget Features**:
+   - Full React component with all preview features
+   - Voice input/output (OpenAI, Eleven Labs)
+   - Multiple AI models (GPT, Claude, Gemini, Grok, DeepSeek)
+   - RAG integration with citations
+   - Multi-language support
+   - Advanced theming and customization
+
+3. **API & Integration**:
+   - RESTful API for chatbot configurations
+   - Cross-origin embedding support
+   - Dynamic configuration loading
+   - Automatic fallback mechanisms
 
 ## 📋 Steps to Complete Integration
 
-### Step 1: Copy Files to WorkerBull App
+### Step 1: Create Your Chatbots
 
-1. **Copy `ChatWidgetWrapper.tsx`**:
+1. **Start the webchat server**:
    ```bash
-   # Copy to your WorkerBull app's components directory
-   # From: webchat/ChatWidgetWrapper.tsx
-   # To: your-workerbull-app/app/components/ChatWidgetWrapper.tsx
+   cd webchat/frontend
+   npm run dev
+   # Will start on http://localhost:3001
    ```
 
-### Step 2: Update Your WorkerBull App Layout
+2. **Open the Dashboard**:
+   - Go to `http://localhost:3001/dashboard`
+   - Click on the "Chatbots" tab
 
-Replace your current `app/layout.tsx` with the content from `layout-fixed.tsx`:
+3. **Create Named Chatbots**:
+   - Click "New Chatbot"
+   - Name your chatbot (e.g., "Customer Support Bot", "Sales Assistant")
+   - Add description and target website
+   - Configure themes, AI models, voice settings, etc.
 
-**Key changes:**
-- ✅ Removed duplicate `RootLayout` function
-- ✅ Removed invalid `widgetConfig` object definition
-- ✅ Kept metadata export (server component)
-- ✅ Added `ChatWidgetWrapper` import
-- ✅ Added `<ChatWidgetWrapper />` at the end of body
+### Step 2: Get Embed Code for Each Chatbot
 
-### Step 3: Start Both Servers
+1. **Select a chatbot** from the Chatbots tab
+2. **Go to "Embed" tab** to get the specific embed code
+3. **Copy the generated script** for that chatbot
 
-**Terminal 1 - Webchat Server (Widget Host):**
-```bash
-cd webchat/frontend
-npm run dev
-# Will start on http://localhost:3001
+### Step 3: Embed on Your Website
+
+1. **Paste the embed code** into your website's HTML:
+   ```html
+   <!-- Customer Support Bot -->
+   <script>
+     (function() {
+       window.chatWidgetConfig = {
+         chatbotId: 'chatbot_1699123456_abc123',
+       };
+
+       const script = document.createElement('script');
+       script.src = 'http://localhost:3001/widget/chatbot.js';
+       script.async = true;
+       script.onload = function() {
+         if (window.initChatWidget) {
+           window.initChatWidget(window.chatWidgetConfig);
+         }
+       };
+       document.head.appendChild(script);
+
+       const link = document.createElement('link');
+       link.rel = 'stylesheet';
+       link.href = 'http://localhost:3001/widget/chatbot.css';
+       document.head.appendChild(link);
+     })();
+   </script>
+   ```
+
+2. **Test the widget** on your website:
+   - Look for the floating chat icon button
+   - Click to open and test all features (voice, AI models, etc.)
+
+### Step 4: Multiple Chatbots Example
+
+You can embed different chatbots on different pages:
+
+```html
+<!-- On support page -->
+<script>
+  window.chatWidgetConfig = { chatbotId: 'support_bot_id' };
+  // Load widget script...
+</script>
+
+<!-- On sales page -->
+<script>
+  window.chatWidgetConfig = { chatbotId: 'sales_bot_id' };
+  // Load widget script...
+</script>
 ```
-
-**Terminal 2 - WorkerBull App:**
-```bash
-cd your-workerbull-app
-npm run dev
-# Should start on http://localhost:3000
-```
-
-### Step 4: Test the Widget
-
-1. Open your WorkerBull app: `http://localhost:3000`
-2. Look for the **floating chat icon button** in the bottom-right corner
-3. Click it to open the chat widget
-4. Try sending a message
 
 ## 🎨 Customization
 
-Edit the `widgetConfig` object in `ChatWidgetWrapper.tsx` to customize:
+All customization is now done through the **Dashboard interface**:
 
-```typescript
-const widgetConfig = {
-  theme: {
-    primaryColor: '#3b82f6',      // Change brand color
-    secondaryColor: '#8b5cf6',    // Change accent color
-  },
-  welcomeMessage: 'Hi! How can I help you?',
-  botName: 'WorkerBull Assistant',
-  position: 'bottom-right',        // or 'bottom-left', 'top-right', 'top-left'
-  voiceEnabled: true,              // Enable/disable voice
-  ragEnabled: true,                // Enable/disable RAG
-}
-```
+1. **Go to Dashboard** → Select your chatbot
+2. **Theme Tab**: Colors, fonts, spacing, shadows
+3. **Configuration Tab**: Basic settings, behavior, API endpoints
+4. **Voice Tab**: Voice engines, speed, auto-play settings
+5. **Customize Tab**: Advanced widget behavior
+
+### **Real-time Updates**
+- Changes in dashboard **automatically update** embedded widgets
+- No need to re-deploy or change embed codes
+- Test changes instantly in the **Preview tab**
+
+### **Advanced Features Available**:
+- ✅ **Voice Input/Output** (OpenAI, Eleven Labs)
+- ✅ **Multiple AI Models** (GPT, Claude, Gemini, Grok, DeepSeek)
+- ✅ **RAG with Citations** 
+- ✅ **Multi-language Support**
+- ✅ **Custom Themes & Branding**
+- ✅ **Analytics & Conversation Tracking**
+- ✅ **File Upload Support**
+- ✅ **Custom CSS/JS Injection**
 
 ## 🔧 Troubleshooting
 
-### Widget icon not showing?
+### Widget not loading?
 
 1. **Check webchat server is running**:
    ```bash
-   # Should see: ready - started server on 0.0.0.0:3001
+   cd webchat/frontend
+   npm run dev
+   # Should see: ✓ Ready on http://localhost:3001
    ```
 
 2. **Check browser console** (F12):
    - Should see: "Chat widget initialized successfully"
-   - If errors about loading files, webchat server might not be running
+   - Check for JavaScript errors or network failures
 
 3. **Check network tab** (F12):
-   - Should see successful loads of:
-     - `http://localhost:3001/widget/chatbot.js`
-     - `http://localhost:3001/widget/chatbot.css`
+   - Verify successful loads:
+     - `http://localhost:3001/widget/chatbot.js` ✅
+     - `http://localhost:3001/widget/chatbot.css` ✅
+     - `http://localhost:3001/api/chatbots/[id]/config` ✅
 
-4. **Check z-index conflicts**:
-   - Widget has z-index: 9999
-   - Make sure no other elements have higher z-index
+4. **Check chatbot configuration**:
+   - Ensure chatbot is **Active** in dashboard
+   - Verify correct `chatbotId` in embed code
+   - Test configuration loading: `http://localhost:3001/api/chatbots/your-id/config`
 
-5. **Check for toast overlap**:
-   - Toast notifications are in bottom-right
-   - Widget is also in bottom-right
-   - They should stack properly (widget on top)
+5. **Common Issues**:
+   - **CORS errors**: Check if embedding from different domain
+   - **Z-index conflicts**: Widget uses z-index: 9999
+   - **Ad blockers**: May block widget scripts
+   - **Cached files**: Try hard refresh (Ctrl+Shift+R)
 
-### Widget button appears but doesn't open?
+### Widget opens but no response to messages?
 
-- Check browser console for JavaScript errors
-- Make sure both servers are running
-- Try hard refresh (Ctrl+Shift+R)
+- Check if chatbot is **Active** in dashboard
+- Verify AI model configuration in chatbot settings
+- Check backend connection and API endpoints
+- Look for errors in browser console during message sending
 
-### TypeScript errors in WorkerBull app?
+### Features not working (voice, AI models, etc.)?
 
-Make sure you:
-- Copied `ChatWidgetWrapper.tsx` to `app/components/` directory
-- Updated the import in `layout.tsx`
-- The file has `'use client'` directive at the top
+- Ensure your chatbot has these features **enabled** in dashboard
+- Check browser permissions for microphone (voice features)
+- Verify API keys are configured properly
+- Test in Preview mode first before embedding
 
-## 📁 File Structure
+## 📁 Project Structure
 
-After integration, your WorkerBull app should have:
-
-```
-your-workerbull-app/
-├── app/
-│   ├── components/
-│   │   └── ChatWidgetWrapper.tsx    ← NEW
-│   ├── layout.tsx                    ← UPDATED
-│   └── ...
-└── ...
-```
-
-And your webchat project now has:
+Your webchat project now includes:
 
 ```
 webchat/
 ├── frontend/
+│   ├── app/
+│   │   ├── dashboard/               ← Multi-chatbot management
+│   │   ├── api/chatbots/            ← Chatbot configuration API
+│   │   └── ...
+│   ├── components/
+│   │   ├── dashboard/
+│   │   │   ├── ChatbotManager.tsx   ← Create/manage chatbots
+│   │   │   └── ...
+│   │   ├── ChatWidget/              ← Full-featured widget
+│   │   └── ...
+│   ├── lib/
+│   │   ├── chatbot-store.ts         ← Chatbot data management
+│   │   └── ...
 │   ├── public/
 │   │   └── widget/
-│   │       ├── chatbot.js           ← NEW
-│   │       └── chatbot.css          ← NEW
-│   ├── package.json                  ← UPDATED (port 3001)
-│   └── ...
-└── ...
+│   │       ├── chatbot.js           ← Enhanced widget with API integration
+│   │       └── chatbot.css          ← Widget styles
+│   └── types/
+│       └── widget.ts                ← Updated types for multi-chatbot
 ```
 
 ## 🚀 Production Deployment
 
-For production, update the URLs in `ChatWidgetWrapper.tsx`:
+### 1. Update URLs for Production
 
-```typescript
-// Change from:
+Replace localhost URLs in your embed codes:
+
+```javascript
+// Development (localhost:3001)
 script.src = 'http://localhost:3001/widget/chatbot.js'
 
-// To:
+// Production 
 script.src = 'https://your-webchat-domain.com/widget/chatbot.js'
 ```
 
-## ✨ Next Steps
+### 2. Environment Configuration
 
-1. Copy the files to your WorkerBull app
-2. Start both servers
-3. Test the widget
-4. Customize the configuration
-5. Add to production when ready
+- Set up production database for chatbot storage
+- Configure production API endpoints
+- Set up proper CORS policies for your domains
+- Add SSL certificates for HTTPS
+
+### 3. Deployment Checklist
+
+- [ ] Deploy webchat application to production server
+- [ ] Update all embed codes with production URLs
+- [ ] Test widget loading from external domains
+- [ ] Verify all features work in production environment
+- [ ] Set up monitoring and analytics
+
+## ✨ What You Can Do Now
+
+### **For Website Owners:**
+1. **Create multiple chatbots** for different purposes
+2. **Customize each chatbot** independently 
+3. **Embed anywhere** with simple script tags
+4. **Real-time updates** without code changes
+
+### **For Different Use Cases:**
+- 🎯 **Customer Support**: RAG-enabled support bot with knowledge base
+- 💰 **Sales Assistant**: Product-focused bot with different AI model
+- 📚 **FAQ Bot**: Simple Q&A bot for common questions  
+- 🌍 **Multi-language Support**: Different language bots for global sites
+
+### **Advanced Features:**
+- **Voice Conversations** with multiple engines
+- **AI Model Selection** per chatbot
+- **Custom Themes** and branding
+- **Citation-enabled RAG** for accurate responses
+- **Analytics** and conversation tracking
 
 ## 🆘 Need Help?
 
-If the widget still doesn't appear:
-1. Check all files are in correct locations
-2. Verify both servers are running
-3. Clear browser cache
-4. Check browser console for errors
-5. Verify no ad blockers are interfering
+### **Quick Diagnostic Steps:**
+1. Visit `http://localhost:3001/dashboard` to manage chatbots
+2. Check `http://localhost:3001/api/chatbots` to see active chatbots
+3. Test config loading: `http://localhost:3001/api/chatbots/[your-id]/config`
+4. Use browser devtools to inspect network requests
+5. Check console for detailed error messages
 
 ---
 
-**Success Criteria:**
-- ✅ Floating chat icon button visible in bottom-right corner
-- ✅ Icon has gradient blue/purple background
-- ✅ Clicking icon opens chat window
-- ✅ Can send and receive messages (demo responses)
-- ✅ No TypeScript errors
-- ✅ No console errors
+## **Success Criteria:**
+- ✅ **Multiple named chatbots** created and managed via dashboard
+- ✅ **Full feature parity** between preview and embedded widgets
+- ✅ **Real-time configuration sync** from dashboard to websites
+- ✅ **Advanced features working**: voice, AI models, RAG, themes
+- ✅ **Cross-domain embedding** with proper CORS support
+- ✅ **API endpoints** serving chatbot configurations
+- ✅ **Production-ready** embed codes with fallback mechanisms

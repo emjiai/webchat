@@ -39,8 +39,43 @@
 
   // Widget initialization function
   window.initChatWidget = function(userConfig = {}) {
-    const config = { ...defaultConfig, ...userConfig };
+    // If chatbotId is provided, fetch configuration from server
+    if (userConfig.chatbotId) {
+      fetchChatbotConfig(userConfig.chatbotId)
+        .then(serverConfig => {
+          const config = { ...defaultConfig, ...serverConfig, ...userConfig };
+          initializeWidget(config);
+        })
+        .catch(error => {
+          console.error('Failed to load chatbot configuration:', error);
+          // Fallback to default config
+          const config = { ...defaultConfig, ...userConfig };
+          initializeWidget(config);
+        });
+    } else {
+      // Use provided config or default
+      const config = { ...defaultConfig, ...userConfig };
+      initializeWidget(config);
+    }
+  };
 
+  // Fetch chatbot configuration from server
+  async function fetchChatbotConfig(chatbotId) {
+    try {
+      const response = await fetch(`http://localhost:3001/api/chatbots/${chatbotId}/config`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.config;
+    } catch (error) {
+      console.error('Error fetching chatbot config:', error);
+      throw error;
+    }
+  }
+
+  // Initialize widget with config
+  function initializeWidget(config) {
     // Load Outfit font from Google Fonts
     if (!document.querySelector('link[href*="fonts.googleapis.com"][href*="Outfit"]')) {
       const fontLink = document.createElement('link');
@@ -53,13 +88,14 @@
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'ai-chatbot-widget-root';
     widgetContainer.setAttribute('data-widget', 'true');
+    widgetContainer.setAttribute('data-chatbot-id', config.chatbotId || 'default');
     document.body.appendChild(widgetContainer);
 
     // Create widget structure
     createWidget(widgetContainer, config);
 
     console.log('Chat widget initialized successfully', config);
-  };
+  }
 
   function createWidget(container, config) {
     // Widget state

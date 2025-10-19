@@ -1,3 +1,14 @@
+export interface Chatbot {
+  id: string
+  name: string
+  description?: string
+  targetWebsite?: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+  config: WidgetConfig
+}
+
 export interface WidgetConfig {
     // Appearance
     theme: {
@@ -130,8 +141,13 @@ export interface WidgetConfig {
   
   export interface ChatSession {
     id: string
+    chatbotId: string
     messages: Message[]
     startedAt: Date
     lastActivity: Date
-    config: WidgetConfig
+    userInfo?: {
+      ip?: string
+      userAgent?: string
+      sessionId?: string
+    }
   }

@@ -8,27 +8,31 @@ import { Copy, Check, Code, Download } from 'lucide-react'
 
 interface EmbedCodeGeneratorProps {
   config: WidgetConfig
+  chatbotId: string
+  chatbotName: string
 }
 
-export default function EmbedCodeGenerator({ config }: EmbedCodeGeneratorProps) {
+export default function EmbedCodeGenerator({ config, chatbotId, chatbotName }: EmbedCodeGeneratorProps) {
   const [copied, setCopied] = useState(false)
   const [embedMethod, setEmbedMethod] = useState<'script' | 'npm' | 'react'>('script')
 
   const generateScriptEmbed = () => {
-    const configString = JSON.stringify(config, null, 2)
-    return `<!-- AI Chatbot Widget -->
+    return `<!-- ${chatbotName} - AI Chatbot Widget -->
 <script>
   (function() {
-    // Widget Configuration
-    const widgetConfig = ${configString};
+    // Chatbot Configuration
+    window.chatWidgetConfig = {
+      chatbotId: '${chatbotId}',
+      // The widget will automatically load the configuration from your server
+    };
 
     // Load Widget Script
     const script = document.createElement('script');
-    script.src = 'https://your-domain.com/widget/chatbot.js';
+    script.src = 'http://localhost:3001/widget/chatbot.js';
     script.async = true;
     script.onload = function() {
       if (window.initChatWidget) {
-        window.initChatWidget(widgetConfig);
+        window.initChatWidget(window.chatWidgetConfig);
       }
     };
     document.head.appendChild(script);
@@ -36,11 +40,11 @@ export default function EmbedCodeGenerator({ config }: EmbedCodeGeneratorProps) 
     // Load Widget Styles
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://your-domain.com/widget/chatbot.css';
+    link.href = 'http://localhost:3001/widget/chatbot.css';
     document.head.appendChild(link);
   })();
 </script>
-<!-- End AI Chatbot Widget -->`
+<!-- End ${chatbotName} Widget -->`
   }
 
   const generateNpmEmbed = () => {
@@ -51,23 +55,118 @@ npm install @your-org/ai-chatbot-widget
 import { ChatWidget } from '@your-org/ai-chatbot-widget';
 import '@your-org/ai-chatbot-widget/dist/styles.css';
 
-const config = ${JSON.stringify(config, null, 2)};
+// ${chatbotName} Configuration
+const config = {
+  chatbotId: '${chatbotId}',
+  apiBaseUrl: 'http://localhost:3001',
+  
+  // Optional: Override specific settings for this instance
+  position: '${config.position}',
+  theme: {
+    primaryColor: '${config.theme.primaryColor}',
+    secondaryColor: '${config.theme.secondaryColor}',
+  },
+  
+  // Event callbacks (optional)
+  onOpen: () => console.log('${chatbotName} opened'),
+  onClose: () => console.log('${chatbotName} closed'),
+  onMessage: (message) => console.log('New message:', message),
+  
+  // The widget will automatically fetch the full configuration from your server
+  // based on the chatbotId, so you only need to override what's necessary
+};
 
-// Initialize the widget
-ChatWidget.init(config);`
+// Initialize the ${chatbotName} widget
+const widget = ChatWidget.init(config);
+
+// Widget control methods (optional)
+// widget.open();     // Programmatically open the widget
+// widget.close();    // Programmatically close the widget
+// widget.destroy();  // Remove the widget from the page`
   }
 
   const generateReactEmbed = () => {
-    return `import { ChatWidget } from '@your-org/ai-chatbot-widget';
+    return `import React, { useState, useCallback } from 'react';
+import { ChatWidget } from '@your-org/ai-chatbot-widget';
 import '@your-org/ai-chatbot-widget/dist/styles.css';
 
 function App() {
-  const widgetConfig = ${JSON.stringify(config, null, 2)};
+  const [isWidgetOpen, setIsWidgetOpen] = useState(false);
+
+  // ${chatbotName} Configuration
+  const widgetConfig = {
+    chatbotId: '${chatbotId}',
+    apiBaseUrl: 'http://localhost:3001',
+    
+    // Optional: Override specific settings
+    position: '${config.position}',
+    theme: {
+      primaryColor: '${config.theme.primaryColor}',
+      secondaryColor: '${config.theme.secondaryColor}',
+    },
+    
+    // Event handlers
+    onOpen: useCallback(() => {
+      console.log('${chatbotName} opened');
+      setIsWidgetOpen(true);
+    }, []),
+    
+    onClose: useCallback(() => {
+      console.log('${chatbotName} closed');
+      setIsWidgetOpen(false);
+    }, []),
+    
+    onMessage: useCallback((message) => {
+      console.log('New message from ${chatbotName}:', message);
+      // You can integrate with analytics, state management, etc.
+    }, []),
+    
+    // The widget will automatically fetch the full configuration from your server
+    // based on the chatbotId, so you only need to override what's necessary
+  };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {/* Your app content */}
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto py-6 px-4">
+          <h1 className="text-3xl font-bold text-gray-900">
+            My Website
+          </h1>
+          {isWidgetOpen && (
+            <p className="text-sm text-green-600 mt-2">
+              ${chatbotName} is active
+            </p>
+          )}
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {/* Your page content here */}
+        <div className="px-4 py-6 sm:px-0">
+          <p>Your website content goes here...</p>
+        </div>
+      </main>
+      
+      {/* ${chatbotName} Widget - renders as floating widget */}
       <ChatWidget config={widgetConfig} />
+    </div>
+  );
+}
+
+export default App;
+
+// Advanced usage: Inline widget component
+export function InlineChatWidget() {
+  const inlineConfig = {
+    ...widgetConfig,
+    displayMode: 'inline',
+    size: 'large',
+  };
+
+  return (
+    <div className="w-full h-96 border rounded-lg">
+      <ChatWidget config={inlineConfig} />
     </div>
   );
 }`
@@ -106,8 +205,11 @@ function App() {
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Embed Code Generator</h3>
-        <p className="text-gray-600">
-          Choose your preferred installation method and copy the code to embed the widget on your website.
+        <p className="text-gray-600 mb-2">
+          Generate embed code for <span className="font-semibold text-gray-900">{chatbotName}</span> (ID: <code className="bg-gray-100 px-1 rounded text-sm">{chatbotId}</code>)
+        </p>
+        <p className="text-sm text-gray-500">
+          Choose your preferred installation method. The widget will automatically load the configuration for this specific chatbot.
         </p>
       </div>
 
@@ -151,26 +253,28 @@ function App() {
         <h4 className="font-semibold mb-2">Installation Instructions:</h4>
         {embedMethod === 'script' && (
           <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
-            <li>Copy the embed code below</li>
+            <li>Copy the embed code below (includes <strong>{chatbotName}</strong> configuration)</li>
             <li>Paste it into your HTML file, preferably before the closing &lt;/body&gt; tag</li>
-            <li>The widget will automatically initialize when the page loads</li>
-            <li>Customize the configuration object to match your needs</li>
+            <li>The widget will automatically load <strong>{chatbotName}</strong>'s configuration from the server</li>
+            <li>Changes made in the dashboard will automatically update the embedded widget</li>
           </ol>
         )}
         {embedMethod === 'npm' && (
           <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
             <li>Install the NPM package using the command shown</li>
             <li>Import the ChatWidget class and styles in your JavaScript file</li>
-            <li>Initialize the widget with your configuration</li>
-            <li>The widget will be added to your page automatically</li>
+            <li>Initialize with <strong>{chatbotName}</strong>'s ID - full config loads automatically</li>
+            <li>Use event callbacks to integrate with your application logic</li>
+            <li>Control the widget programmatically using the returned widget instance</li>
           </ol>
         )}
         {embedMethod === 'react' && (
           <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
-            <li>Install the NPM package: npm install @your-org/ai-chatbot-widget</li>
+            <li>Install the NPM package: <code>npm install @your-org/ai-chatbot-widget</code></li>
             <li>Import the ChatWidget component in your React app</li>
-            <li>Add the component with your configuration props</li>
-            <li>The widget will render as part of your React component tree</li>
+            <li>Use <strong>{chatbotName}</strong>'s ID - configuration loads automatically from server</li>
+            <li>Implement event handlers for open/close/message events</li>
+            <li>Supports both floating widget and inline component modes</li>
           </ol>
         )}
       </div>
