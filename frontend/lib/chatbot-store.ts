@@ -2,216 +2,246 @@
 
 import { Chatbot, WidgetConfig } from '@/types/widget'
 
-// In-memory store for development - replace with database in production
+// Client-side store that communicates with server APIs
 class ChatbotStore {
   private chatbots: Map<string, Chatbot> = new Map()
+  private isLoaded: boolean = false
+  private loadingPromise: Promise<void> | null = null
 
   constructor() {
-    // Initialize with a default chatbot if none exist
-    if (this.chatbots.size === 0) {
-      this.createDefaultChatbot()
+    // Initialize will be called lazily
+  }
+
+  private async loadChatbotsFromServer(): Promise<void> {
+    if (this.isLoaded || this.loadingPromise) {
+      return this.loadingPromise || Promise.resolve()
+    }
+
+    this.loadingPromise = this.fetchChatbotsFromAPI()
+    return this.loadingPromise
+  }
+
+  private async fetchChatbotsFromAPI(): Promise<void> {
+    try {
+      console.log('Client store: Fetching chatbots from server...')
+      // Use internal API to get full chatbot data including configs
+      const response = await fetch('/api/chatbots/internal')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      // Clear existing chatbots and load from server
+      this.chatbots.clear()
+      
+      if (data.chatbots && Array.isArray(data.chatbots)) {
+        data.chatbots.forEach((chatbot: Chatbot) => {
+          console.log(`Client store: Loading chatbot ${chatbot.id} with config:`, chatbot.config)
+          this.chatbots.set(chatbot.id, chatbot)
+        })
+        console.log(`Client store: Loaded ${data.chatbots.length} chatbots from server`)
+      }
+      
+      // If no chatbots found, try to get all chatbots (including inactive)
+      if (this.chatbots.size === 0) {
+        await this.fetchAllChatbotsFromAPI()
+      }
+      
+      this.isLoaded = true
+    } catch (error) {
+      console.error('Client store: Error fetching chatbots from server:', error)
+      // Don't throw - create a default chatbot locally if server fails
+      await this.createDefaultChatbotViaAPI()
+      this.isLoaded = true
     }
   }
 
-  private createDefaultChatbot() {
-    const defaultConfig: WidgetConfig = {
-      theme: {
-        primaryColor: '#3b82f6',
-        secondaryColor: '#8b5cf6',
-        backgroundColor: '#ffffff',
-        textColor: '#1f2937',
-        fontFamily: 'Outfit',
-      },
-      welcomeMessage: 'Hi! How can I help you today?',
-      botName: 'AI Assistant',
-      botAvatar: '/bot-avatar.png',
-      placeholder: 'Type your message...',
-      borderRadius: 12,
-      displayMode: 'popup',
-      position: 'bottom-right',
-      size: 'medium',
-      width: 380,
-      height: 560,
-      zIndex: 9999,
-      showHeader: true,
-      showFooter: true,
-      enableDragDrop: true,
-      voiceEnabled: true,
-      defaultVoiceEngine: 'openai',
-      voiceSpeed: 1.0,
-      voiceStyle: 'friendly',
-      autoPlayResponses: false,
-      defaultTextModel: 'gpt',
-      temperature: 0.7,
-      maxTokens: 1024,
-      streamingEnabled: true,
-      showTypingIndicator: true,
-      ragEnabled: true,
-      showCitations: true,
-      maxRetrievedDocs: 3,
-      minRelevanceScore: 0.5,
-      collectUserInfo: false,
-      enableAnalytics: false,
-      allowFileUploads: false,
+  private async fetchAllChatbotsFromAPI(): Promise<void> {
+    try {
+      // Try to get individual chatbot data
+      const response = await fetch('/api/chatbots')
+      if (response.ok) {
+        const data = await response.json()
+        console.log('All chatbots response:', data)
+      }
+    } catch (error) {
+      console.error('Error fetching all chatbots:', error)
     }
+  }
 
-    const defaultChatbot: Chatbot = {
-      id: 'default',
-      name: 'Default Chatbot',
-      description: 'Your first chatbot - configure and customize as needed',
-      targetWebsite: '',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      config: defaultConfig
+  private async createDefaultChatbotViaAPI(): Promise<void> {
+    try {
+      console.log('Client store: Creating default chatbot via API...')
+      const response = await fetch('/api/chatbots', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'Default Chatbot',
+          description: 'Your first chatbot - configure and customize as needed',
+          targetWebsite: '',
+        }),
+      })
+
+      if (response.ok) {
+        const newChatbot = await response.json()
+        this.chatbots.set(newChatbot.id, newChatbot)
+        console.log('Client store: Created default chatbot:', newChatbot.id)
+      }
+    } catch (error) {
+      console.error('Client store: Error creating default chatbot:', error)
     }
-
-    this.chatbots.set(defaultChatbot.id, defaultChatbot)
   }
 
   // Get all chatbots
-  getAllChatbots(): Chatbot[] {
+  async getAllChatbots(): Promise<Chatbot[]> {
+    await this.loadChatbotsFromServer()
     return Array.from(this.chatbots.values())
   }
 
   // Get chatbot by ID
-  getChatbot(id: string): Chatbot | undefined {
-    return this.chatbots.get(id)
+  async getChatbot(id: string): Promise<Chatbot | undefined> {
+    await this.loadChatbotsFromServer()
+    let chatbot = this.chatbots.get(id)
+    
+    // If not found in cache, try to fetch from server
+    if (!chatbot) {
+      try {
+        const response = await fetch(`/api/chatbots/${id}`)
+        if (response.ok) {
+          chatbot = await response.json()
+          if (chatbot) {
+            this.chatbots.set(id, chatbot)
+          }
+        }
+      } catch (error) {
+        console.error(`Client store: Error fetching chatbot ${id}:`, error)
+      }
+    }
+    
+    return chatbot
   }
 
   // Create new chatbot
-  createChatbot(name: string, description?: string, targetWebsite?: string): Chatbot {
-    const id = 'chatbot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-    const defaultConfig = this.getChatbot('default')?.config || this.createDefaultConfig()
-    
-    const newChatbot: Chatbot = {
-      id,
-      name,
-      description,
-      targetWebsite,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      config: { ...defaultConfig, botName: name }
-    }
+  async createChatbot(name: string, description?: string, targetWebsite?: string): Promise<Chatbot> {
+    try {
+      const response = await fetch('/api/chatbots', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, description, targetWebsite }),
+      })
 
-    this.chatbots.set(id, newChatbot)
-    return newChatbot
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const newChatbot = await response.json()
+      this.chatbots.set(newChatbot.id, newChatbot)
+      console.log('Client store: Created chatbot:', newChatbot.id)
+      return newChatbot
+    } catch (error) {
+      console.error('Client store: Error creating chatbot:', error)
+      throw error
+    }
   }
 
   // Update chatbot
-  updateChatbot(id: string, updates: Partial<Omit<Chatbot, 'id' | 'createdAt'>>): Chatbot | undefined {
-    const chatbot = this.chatbots.get(id)
-    if (!chatbot) return undefined
+  async updateChatbot(id: string, updates: Partial<Omit<Chatbot, 'id' | 'createdAt'>>): Promise<Chatbot | undefined> {
+    try {
+      const response = await fetch(`/api/chatbots/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      })
 
-    const updatedChatbot: Chatbot = {
-      ...chatbot,
-      ...updates,
-      updatedAt: new Date()
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const updatedChatbot = await response.json()
+      this.chatbots.set(id, updatedChatbot)
+      console.log('Client store: Updated chatbot:', id)
+      return updatedChatbot
+    } catch (error) {
+      console.error('Client store: Error updating chatbot:', error)
+      return undefined
     }
-
-    this.chatbots.set(id, updatedChatbot)
-    return updatedChatbot
   }
 
   // Update chatbot configuration
-  updateChatbotConfig(id: string, configUpdates: Partial<WidgetConfig>): Chatbot | undefined {
-    const chatbot = this.chatbots.get(id)
-    if (!chatbot) return undefined
+  async updateChatbotConfig(id: string, configUpdates: Partial<WidgetConfig>): Promise<Chatbot | undefined> {
+    try {
+      const response = await fetch(`/api/chatbots/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ config: configUpdates }),
+      })
 
-    const updatedChatbot: Chatbot = {
-      ...chatbot,
-      config: { ...chatbot.config, ...configUpdates },
-      updatedAt: new Date()
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const updatedChatbot = await response.json()
+      this.chatbots.set(id, updatedChatbot)
+      console.log('Client store: Updated chatbot config:', id)
+      return updatedChatbot
+    } catch (error) {
+      console.error('Client store: Error updating chatbot config:', error)
+      return undefined
     }
-
-    this.chatbots.set(id, updatedChatbot)
-    return updatedChatbot
   }
 
   // Delete chatbot
-  deleteChatbot(id: string): boolean {
-    if (id === 'default') {
-      throw new Error('Cannot delete the default chatbot')
+  async deleteChatbot(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/chatbots/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      this.chatbots.delete(id)
+      console.log('Client store: Deleted chatbot:', id)
+      return true
+    } catch (error) {
+      console.error('Client store: Error deleting chatbot:', error)
+      return false
     }
-    return this.chatbots.delete(id)
   }
 
   // Toggle chatbot active status
-  toggleChatbotStatus(id: string): Chatbot | undefined {
+  async toggleChatbotStatus(id: string): Promise<Chatbot | undefined> {
     const chatbot = this.chatbots.get(id)
     if (!chatbot) return undefined
 
-    const updatedChatbot: Chatbot = {
-      ...chatbot,
-      isActive: !chatbot.isActive,
-      updatedAt: new Date()
-    }
-
-    this.chatbots.set(id, updatedChatbot)
-    return updatedChatbot
+    return this.updateChatbot(id, { isActive: !chatbot.isActive })
   }
 
   // Clone chatbot
-  cloneChatbot(id: string, newName: string): Chatbot | undefined {
+  async cloneChatbot(id: string, newName: string): Promise<Chatbot | undefined> {
     const originalChatbot = this.chatbots.get(id)
     if (!originalChatbot) return undefined
 
-    const newId = 'chatbot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-    const clonedChatbot: Chatbot = {
-      ...originalChatbot,
-      id: newId,
-      name: newName,
-      description: `Clone of ${originalChatbot.name}`,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      config: { ...originalChatbot.config, botName: newName }
-    }
-
-    this.chatbots.set(newId, clonedChatbot)
-    return clonedChatbot
-  }
-
-  private createDefaultConfig(): WidgetConfig {
-    return {
-      theme: {
-        primaryColor: '#3b82f6',
-        secondaryColor: '#8b5cf6',
-        backgroundColor: '#ffffff',
-        textColor: '#1f2937',
-        fontFamily: 'Outfit',
-      },
-      welcomeMessage: 'Hi! How can I help you today?',
-      botName: 'AI Assistant',
-      botAvatar: '/bot-avatar.png',
-      placeholder: 'Type your message...',
-      borderRadius: 12,
-      displayMode: 'popup',
-      position: 'bottom-right',
-      size: 'medium',
-      width: 380,
-      height: 560,
-      zIndex: 9999,
-      showHeader: true,
-      showFooter: true,
-      enableDragDrop: true,
-      voiceEnabled: true,
-      defaultVoiceEngine: 'openai',
-      voiceSpeed: 1.0,
-      voiceStyle: 'friendly',
-      autoPlayResponses: false,
-      defaultTextModel: 'gpt',
-      temperature: 0.7,
-      maxTokens: 1024,
-      streamingEnabled: true,
-      showTypingIndicator: true,
-      ragEnabled: true,
-      showCitations: true,
-      maxRetrievedDocs: 3,
-      minRelevanceScore: 0.5,
-      collectUserInfo: false,
-      enableAnalytics: false,
-      allowFileUploads: false,
+    try {
+      return await this.createChatbot(
+        newName,
+        `Clone of ${originalChatbot.name}`,
+        originalChatbot.targetWebsite
+      )
+    } catch (error) {
+      console.error('Client store: Error cloning chatbot:', error)
+      return undefined
     }
   }
 }
@@ -219,7 +249,7 @@ class ChatbotStore {
 // Singleton instance
 export const chatbotStore = new ChatbotStore()
 
-// React hook for chatbot management
+// React hook for chatbot management (now async)
 export function useChatbotStore() {
   return {
     getAllChatbots: () => chatbotStore.getAllChatbots(),

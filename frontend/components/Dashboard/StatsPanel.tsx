@@ -43,75 +43,59 @@ interface StatsData {
 }
 
 interface StatsPanelProps {
+  chatbotId?: string
   timeRange?: '24h' | '7d' | '30d' | '90d'
   onRefresh?: () => void
   onExport?: () => void
 }
 
 export default function StatsPanel({ 
+  chatbotId,
   timeRange: initialTimeRange = '7d',
   onRefresh,
   onExport 
 }: StatsPanelProps) {
   const [timeRange, setTimeRange] = useState(initialTimeRange)
   const [isLoading, setIsLoading] = useState(false)
-  const [stats, setStats] = useState<StatsData>({
-    totalConversations: 1247,
-    totalMessages: 8934,
-    uniqueUsers: 423,
-    avgResponseTime: 1.3,
-    voiceMessages: 2341,
-    textMessages: 6593,
-    ragQueries: 1876,
-    satisfaction: 94.7,
-    activeUsers: 87,
-    peakHour: '2:00 PM',
-    popularModel: 'GPT-4',
-    avgSessionDuration: 8.5,
-    conversationTrends: [
-      { date: 'Mon', count: 145 },
-      { date: 'Tue', count: 189 },
-      { date: 'Wed', count: 203 },
-      { date: 'Thu', count: 178 },
-      { date: 'Fri', count: 221 },
-      { date: 'Sat', count: 156 },
-      { date: 'Sun', count: 155 }
-    ],
-    modelUsage: [
-      { model: 'GPT-4', percentage: 45 },
-      { model: 'Claude', percentage: 28 },
-      { model: 'Gemini', percentage: 15 },
-      { model: 'Grok', percentage: 8 },
-      { model: 'DeepSeek', percentage: 4 }
-    ],
-    responseTimeDistribution: [
-      { range: '0-1s', count: 456 },
-      { range: '1-2s', count: 312 },
-      { range: '2-3s', count: 189 },
-      { range: '3-5s', count: 98 },
-      { range: '5s+', count: 23 }
-    ]
-  })
+  const [error, setError] = useState<string | null>(null)
+  const [stats, setStats] = useState<StatsData | null>(null)
 
-  // Simulate data refresh
-  const handleRefresh = async () => {
+  // Fetch chatbot-specific analytics
+  const fetchAnalytics = async () => {
+    if (!chatbotId) return
+
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    setError(null)
     
-    // Update with new random data
-    setStats(prev => ({
-      ...prev,
-      totalConversations: prev.totalConversations + Math.floor(Math.random() * 50),
-      totalMessages: prev.totalMessages + Math.floor(Math.random() * 200),
-      uniqueUsers: prev.uniqueUsers + Math.floor(Math.random() * 10),
-      activeUsers: Math.floor(Math.random() * 50) + 50
-    }))
-    
-    setIsLoading(false)
+    try {
+      const response = await fetch(`/api/analytics/${chatbotId}?timeRange=${timeRange}`)
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch analytics: ${response.status}`)
+      }
+      
+      const analyticsData = await response.json()
+      setStats(analyticsData)
+    } catch (err) {
+      console.error('Error fetching analytics:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load analytics')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Load analytics when component mounts or dependencies change
+  useEffect(() => {
+    fetchAnalytics()
+  }, [chatbotId, timeRange])
+
+  // Refresh data
+  const handleRefresh = async () => {
+    await fetchAnalytics()
     onRefresh?.()
   }
 
-  // Calculate percentage changes
+  // Calculate percentage changes (mock previous values for demo)
   const calculateChange = (current: number, previous: number) => {
     const change = ((current - previous) / previous) * 100
     return {
@@ -120,10 +104,53 @@ export default function StatsPanel({
     }
   }
 
-  const conversationChange = calculateChange(stats.totalConversations, 1100)
-  const userChange = calculateChange(stats.uniqueUsers, 380)
-  const responseTimeChange = calculateChange(stats.avgResponseTime, 1.5)
-  const satisfactionChange = calculateChange(stats.satisfaction, 92.3)
+  // Mock previous values for percentage change calculation
+  const conversationChange = stats ? calculateChange(stats.totalConversations, Math.floor(stats.totalConversations * 0.85)) : { value: '0', isPositive: true }
+  const userChange = stats ? calculateChange(stats.uniqueUsers, Math.floor(stats.uniqueUsers * 0.9)) : { value: '0', isPositive: true }
+  const responseTimeChange = stats ? calculateChange(stats.avgResponseTime, stats.avgResponseTime * 1.1) : { value: '0', isPositive: false }
+  const satisfactionChange = stats ? calculateChange(stats.satisfaction, stats.satisfaction * 0.95) : { value: '0', isPositive: true }
+
+  // Show loading state
+  if (isLoading && !stats) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Loading analytics...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Error loading analytics: {error}</p>
+            <button
+              onClick={handleRefresh}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show empty state
+  if (!stats) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-600">No analytics data available</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

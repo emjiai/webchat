@@ -20,11 +20,11 @@ interface ChatWidgetProps {
 
 export default function ChatWidget({ config, isPreview = false, onToggle }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<Message[]>(() => [
     {
       id: uuidv4(),
       role: 'assistant',
-      content: config.welcomeMessage,
+      content: config?.welcomeMessage || 'Hi! How can I help you today?',
       timestamp: new Date(),
       type: 'text'
     }
@@ -37,9 +37,9 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
     isRecording: false,
     isPlaying: false,
     isSpeaking: false,
-    currentEngine: config.defaultVoiceEngine,
+    currentEngine: config?.defaultVoiceEngine || 'openai',
     volume: 1,
-    speed: config.voiceSpeed
+    speed: config?.voiceSpeed || 1.0
   })
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -48,6 +48,22 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
 
   useEffect(() => {
     setCurrentConfig(config)
+    
+    // Update the initial welcome message when config changes
+    console.log('ChatWidget: Config changed, welcomeMessage:', config?.welcomeMessage)
+    console.log('ChatWidget: Bot name:', config?.botName)
+    
+    if (config?.welcomeMessage) {
+      setMessages([
+        {
+          id: uuidv4(),
+          role: 'assistant',
+          content: config.welcomeMessage,
+          timestamp: new Date(),
+          type: 'text'
+        }
+      ])
+    }
   }, [config])
 
   useEffect(() => {
@@ -79,8 +95,8 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
       // Process message with RAG and selected model
       const response = await processMessage(
         content,
-        currentConfig.defaultTextModel,
-        currentConfig.ragEnabled
+        currentConfig?.defaultTextModel || 'gpt',
+        currentConfig?.ragEnabled || true
       )
 
       const assistantMessage: Message = {
@@ -90,13 +106,13 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
         timestamp: new Date(),
         type: 'text',
         citations: response.citations,
-        model: currentConfig.defaultTextModel
+        model: currentConfig?.defaultTextModel || 'gpt'
       }
 
       setMessages(prev => [...prev, assistantMessage])
 
       // Auto-play voice response if enabled
-      if (currentConfig.voiceEnabled && currentConfig.autoPlayResponses) {
+      if (currentConfig?.voiceEnabled && currentConfig?.autoPlayResponses) {
         await handlePlayVoice(response.content)
       }
     } catch (error) {
@@ -140,7 +156,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
       setVoiceState(prev => ({ ...prev, isSpeaking: true }))
       const audioUrl = await synthesizeSpeech(text, voiceState.currentEngine, {
         speed: voiceState.speed,
-        style: currentConfig.voiceStyle
+        style: currentConfig?.voiceStyle || 'friendly'
       })
       
       if (audioRef.current) {
@@ -167,7 +183,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
       'top-right': 'top-4 right-4',
       'top-left': 'top-4 left-4'
     }
-    return positions[currentConfig.position]
+    return positions[currentConfig?.position || 'bottom-right']
   }
 
   const getWidgetSize = () => {
@@ -176,10 +192,10 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
       medium: 'w-96 h-[600px]',
       large: 'w-[450px] h-[700px]'
     }
-    return sizes[currentConfig.size]
+    return sizes[currentConfig?.size || 'medium']
   }
 
-  if (currentConfig.displayMode === 'inline') {
+  if (currentConfig?.displayMode === 'inline') {
     return (
       <div className={`${getWidgetSize()} flex flex-col bg-white rounded-xl shadow-xl overflow-hidden`}>
         {/* Inline widget content */}
@@ -194,15 +210,15 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
       <div 
         className="flex items-center justify-between p-4 border-b"
         style={{ 
-          background: `linear-gradient(135deg, ${currentConfig.theme.primaryColor}, ${currentConfig.theme.secondaryColor})` 
+          background: `linear-gradient(135deg, ${currentConfig?.theme?.primaryColor || '#3b82f6'}, ${currentConfig?.theme?.secondaryColor || '#8b5cf6'})` 
         }}
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Bot className="w-6 h-6" style={{ color: currentConfig.theme.primaryColor }} />
+            <Bot className="w-6 h-6" style={{ color: currentConfig?.theme?.primaryColor || '#3b82f6' }} />
           </div>
           <div>
-            <h3 className="font-semibold text-white">{currentConfig.botName}</h3>
+            <h3 className="font-semibold text-white">{currentConfig?.botName || 'AI Assistant'}</h3>
             <p className="text-xs text-white/80">
               {voiceState.isRecording ? 'Listening...' : 'Online'}
             </p>
@@ -215,7 +231,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
           >
             <Settings className="w-5 h-5 text-white" />
           </button>
-          {currentConfig.displayMode === 'popup' && (
+          {currentConfig?.displayMode === 'popup' && (
             <button
               onClick={toggleWidget}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -251,7 +267,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
       </div>
 
       {/* Voice Controls */}
-      {currentConfig.voiceEnabled && (
+      {currentConfig?.voiceEnabled && (
         <VoiceControls
           voiceState={voiceState}
           onVoiceStateChange={setVoiceState}
@@ -266,7 +282,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
         onSend={() => handleSendMessage(inputValue)}
         onVoiceInput={handleVoiceInput}
         isLoading={isLoading}
-        voiceEnabled={currentConfig.voiceEnabled}
+        voiceEnabled={currentConfig?.voiceEnabled || false}
         voiceState={voiceState}
         config={currentConfig}
       />
@@ -288,7 +304,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
             onClick={toggleWidget}
             className={`fixed ${getWidgetPosition()} p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50`}
             style={{ 
-              background: `linear-gradient(135deg, ${currentConfig.theme.primaryColor}, ${currentConfig.theme.secondaryColor})` 
+              background: `linear-gradient(135deg, ${currentConfig?.theme?.primaryColor || '#3b82f6'}, ${currentConfig?.theme?.secondaryColor || '#8b5cf6'})` 
             }}
           >
             <MessageSquare className="w-6 h-6 text-white" />
@@ -307,7 +323,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className={`fixed ${getWidgetPosition()} ${getWidgetSize()} flex flex-col bg-white rounded-xl shadow-2xl overflow-hidden z-50`}
-            style={{ backgroundColor: currentConfig.theme.backgroundColor }}
+            style={{ backgroundColor: currentConfig?.theme?.backgroundColor || '#ffffff' }}
           >
             <ChatContent />
           </motion.div>

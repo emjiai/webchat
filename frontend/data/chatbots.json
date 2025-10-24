@@ -1,0 +1,1007 @@
+{
+  "chatbots": {
+    "ecom_bot_001": {
+      "id": "ecom_bot_001",
+      "name": "ShopSmart Assistant",
+      "targetWebsite": "https://shopsmart.com",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "isActive": true,
+      "config": {
+        "theme": {
+          "primaryColor": "#e53e3e",
+          "secondaryColor": "#f56565",
+          "backgroundColor": "#ffffff",
+          "textColor": "#1a202c",
+          "fontFamily": "Inter"
+        },
+        "welcomeMessage": "Hi! I'm your ShopSmart assistant. I can help you find products, track orders, and answer questions about your shopping experience!",
+        "botName": "ShopSmart Helper",
+        "botAvatar": "/bot-avatar.png",
+        "placeholder": "Ask about products, orders, or returns...",
+        "borderRadius": 16,
+        "displayMode": "popup",
+        "position": "bottom-right",
+        "size": "medium",
+        "width": 400,
+        "height": 600,
+        "zIndex": 9999,
+        "showHeader": true,
+        "showFooter": true,
+        "enableDragDrop": true,
+        "voiceEnabled": true,
+        "defaultVoiceEngine": "openai",
+        "voiceSpeed": 1,
+        "voiceStyle": "friendly",
+        "autoPlayResponses": true,
+        "defaultTextModel": "gpt",
+        "temperature": 0.7,
+        "maxTokens": 1024,
+        "streamingEnabled": true,
+        "showTypingIndicator": true,
+        "ragEnabled": true,
+        "showCitations": true,
+        "maxRetrievedDocs": 3,
+        "minRelevanceScore": 0.6,
+        "collectUserInfo": true,
+        "enableAnalytics": true,
+        "allowFileUploads": true
+      },
+      "analytics": {
+        "totalConversations": 1247,
+        "totalMessages": 8934,
+        "uniqueUsers": 423,
+        "avgResponseTime": 1.3,
+        "voiceMessages": 2341,
+        "textMessages": 6593,
+        "ragQueries": 1876,
+        "satisfaction": 94.7,
+        "activeUsers": 87,
+        "peakHour": "2:00 PM",
+        "popularModel": "GPT-4",
+        "avgSessionDuration": 8.5,
+        "conversationTrends": [
+          {
+            "date": "Mon",
+            "count": 145
+          },
+          {
+            "date": "Tue",
+            "count": 189
+          },
+          {
+            "date": "Wed",
+            "count": 203
+          },
+          {
+            "date": "Thu",
+            "count": 178
+          },
+          {
+            "date": "Fri",
+            "count": 221
+          },
+          {
+            "date": "Sat",
+            "count": 156
+          },
+          {
+            "date": "Sun",
+            "count": 155
+          }
+        ],
+        "modelUsage": [
+          {
+            "model": "GPT-4",
+            "percentage": 45
+          },
+          {
+            "model": "Claude",
+            "percentage": 28
+          },
+          {
+            "model": "Gemini",
+            "percentage": 15
+          },
+          {
+            "model": "Grok",
+            "percentage": 8
+          },
+          {
+            "model": "DeepSeek",
+            "percentage": 4
+          }
+        ],
+        "responseTimeDistribution": [
+          {
+            "range": "0-1s",
+            "count": 456
+          },
+          {
+            "range": "1-2s",
+            "count": 312
+          },
+          {
+            "range": "2-3s",
+            "count": 189
+          },
+          {
+            "range": "3-5s",
+            "count": 98
+          },
+          {
+            "range": "5s+",
+            "count": 23
+          }
+        ]
+      },
+      "conversations": [
+        {
+          "id": "conv_001",
+          "userId": "user_123",
+          "startedAt": "2024-01-20T14:30:00Z",
+          "messages": [
+            {
+              "id": "msg_001",
+              "role": "assistant",
+              "content": "Hi! I'm your ShopSmart assistant. I can help you find products, track orders, and answer questions about your shopping experience!",
+              "timestamp": "2024-01-20T14:30:00Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_002",
+              "role": "user",
+              "content": "I'm looking for a new laptop for work",
+              "timestamp": "2024-01-20T14:30:15Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_003",
+              "role": "assistant",
+              "content": "Great! I'd love to help you find the perfect work laptop. What's your budget range, and what type of work will you primarily use it for?",
+              "timestamp": "2024-01-20T14:30:18Z",
+              "type": "text",
+              "model": "gpt"
+            },
+            {
+              "id": "msg_004",
+              "role": "user",
+              "content": "Around $1500, mainly for programming and video calls",
+              "timestamp": "2024-01-20T14:30:45Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_005",
+              "role": "assistant",
+              "content": "Perfect! For programming and video calls in that budget, I'd recommend the MacBook Air M3 or the Dell XPS 13. Both have excellent performance, great displays, and reliable webcams. Would you like me to show you the specifications and current prices?",
+              "timestamp": "2024-01-20T14:30:48Z",
+              "type": "text",
+              "model": "gpt",
+              "citations": [
+                {
+                  "id": "cite_001",
+                  "title": "MacBook Air M3 - Technical Specifications",
+                  "snippet": "Apple M3 chip, 8GB unified memory, 256GB SSD storage"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "support_bot_002": {
+      "id": "support_bot_002",
+      "name": "TechCorp Support",
+      "targetWebsite": "https://techcorp.com",
+      "createdAt": "2024-01-10T09:15:00Z",
+      "isActive": true,
+      "config": {
+        "theme": {
+          "primaryColor": "#3182ce",
+          "secondaryColor": "#4299e1",
+          "backgroundColor": "#f7fafc",
+          "textColor": "#2d3748",
+          "fontFamily": "Roboto"
+        },
+        "welcomeMessage": "Hello! I'm TechCorp's support assistant. I can help you with technical issues, account problems, and general inquiries.",
+        "botName": "TechCorp Assistant",
+        "botAvatar": "/bot-avatar.png",
+        "placeholder": "Describe your technical issue...",
+        "borderRadius": 12,
+        "displayMode": "popup",
+        "position": "bottom-left",
+        "size": "large",
+        "width": 450,
+        "height": 650,
+        "zIndex": 9999,
+        "showHeader": true,
+        "showFooter": true,
+        "enableDragDrop": false,
+        "voiceEnabled": false,
+        "defaultVoiceEngine": "elevenlabs",
+        "voiceSpeed": 0.9,
+        "voiceStyle": "professional",
+        "autoPlayResponses": false,
+        "defaultTextModel": "claude",
+        "temperature": 0.5,
+        "maxTokens": 2048,
+        "streamingEnabled": true,
+        "showTypingIndicator": true,
+        "ragEnabled": true,
+        "showCitations": true,
+        "maxRetrievedDocs": 5,
+        "minRelevanceScore": 0.7,
+        "collectUserInfo": true,
+        "enableAnalytics": true,
+        "allowFileUploads": true
+      },
+      "analytics": {
+        "totalConversations": 892,
+        "totalMessages": 5234,
+        "uniqueUsers": 234,
+        "avgResponseTime": 2.1,
+        "voiceMessages": 0,
+        "textMessages": 5234,
+        "ragQueries": 3456,
+        "satisfaction": 91.2,
+        "activeUsers": 43,
+        "peakHour": "10:00 AM",
+        "popularModel": "Claude",
+        "avgSessionDuration": 12.3,
+        "conversationTrends": [
+          {
+            "date": "Mon",
+            "count": 98
+          },
+          {
+            "date": "Tue",
+            "count": 134
+          },
+          {
+            "date": "Wed",
+            "count": 156
+          },
+          {
+            "date": "Thu",
+            "count": 143
+          },
+          {
+            "date": "Fri",
+            "count": 167
+          },
+          {
+            "date": "Sat",
+            "count": 89
+          },
+          {
+            "date": "Sun",
+            "count": 105
+          }
+        ],
+        "modelUsage": [
+          {
+            "model": "Claude",
+            "percentage": 65
+          },
+          {
+            "model": "GPT-4",
+            "percentage": 25
+          },
+          {
+            "model": "Gemini",
+            "percentage": 8
+          },
+          {
+            "model": "Grok",
+            "percentage": 2
+          },
+          {
+            "model": "DeepSeek",
+            "percentage": 0
+          }
+        ],
+        "responseTimeDistribution": [
+          {
+            "range": "0-1s",
+            "count": 234
+          },
+          {
+            "range": "1-2s",
+            "count": 445
+          },
+          {
+            "range": "2-3s",
+            "count": 312
+          },
+          {
+            "range": "3-5s",
+            "count": 156
+          },
+          {
+            "range": "5s+",
+            "count": 87
+          }
+        ]
+      },
+      "conversations": [
+        {
+          "id": "conv_002",
+          "userId": "user_456",
+          "startedAt": "2024-01-20T10:15:00Z",
+          "messages": [
+            {
+              "id": "msg_006",
+              "role": "assistant",
+              "content": "Hello! I'm TechCorp's support assistant. I can help you with technical issues, account problems, and general inquiries.",
+              "timestamp": "2024-01-20T10:15:00Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_007",
+              "role": "user",
+              "content": "I can't access my account, it says my password is incorrect",
+              "timestamp": "2024-01-20T10:15:30Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_008",
+              "role": "assistant",
+              "content": "I understand how frustrating that can be. Let me help you regain access to your account. First, let's try a password reset. Can you confirm the email address associated with your account?",
+              "timestamp": "2024-01-20T10:15:35Z",
+              "type": "text",
+              "model": "claude"
+            }
+          ]
+        }
+      ]
+    },
+    "edu_bot_003": {
+      "id": "edu_bot_003",
+      "name": "EduLearn Tutor",
+      "targetWebsite": "https://edulearn.academy",
+      "createdAt": "2024-01-05T16:45:00Z",
+      "isActive": true,
+      "config": {
+        "theme": {
+          "primaryColor": "#38a169",
+          "secondaryColor": "#68d391",
+          "backgroundColor": "#f0fff4",
+          "textColor": "#1a202c",
+          "fontFamily": "Open Sans"
+        },
+        "welcomeMessage": "Welcome to EduLearn! I'm your personal tutor assistant. I can help with homework, explain concepts, and guide your learning journey.",
+        "botName": "EduLearn Tutor",
+        "botAvatar": "/bot-avatar.png",
+        "placeholder": "Ask me about any subject...",
+        "borderRadius": 20,
+        "displayMode": "popup",
+        "position": "top-right",
+        "size": "medium",
+        "width": 380,
+        "height": 560,
+        "zIndex": 9999,
+        "showHeader": true,
+        "showFooter": true,
+        "enableDragDrop": true,
+        "voiceEnabled": true,
+        "defaultVoiceEngine": "openai",
+        "voiceSpeed": 0.8,
+        "voiceStyle": "friendly",
+        "autoPlayResponses": false,
+        "defaultTextModel": "gemini",
+        "temperature": 0.6,
+        "maxTokens": 1536,
+        "streamingEnabled": true,
+        "showTypingIndicator": true,
+        "ragEnabled": true,
+        "showCitations": true,
+        "maxRetrievedDocs": 4,
+        "minRelevanceScore": 0.65,
+        "collectUserInfo": false,
+        "enableAnalytics": true,
+        "allowFileUploads": true
+      },
+      "analytics": {
+        "totalConversations": 2156,
+        "totalMessages": 12890,
+        "uniqueUsers": 678,
+        "avgResponseTime": 1.8,
+        "voiceMessages": 1234,
+        "textMessages": 11656,
+        "ragQueries": 8934,
+        "satisfaction": 96.3,
+        "activeUsers": 134,
+        "peakHour": "4:00 PM",
+        "popularModel": "Gemini",
+        "avgSessionDuration": 15.7,
+        "conversationTrends": [
+          {
+            "date": "Mon",
+            "count": 234
+          },
+          {
+            "date": "Tue",
+            "count": 298
+          },
+          {
+            "date": "Wed",
+            "count": 345
+          },
+          {
+            "date": "Thu",
+            "count": 389
+          },
+          {
+            "date": "Fri",
+            "count": 267
+          },
+          {
+            "date": "Sat",
+            "count": 198
+          },
+          {
+            "date": "Sun",
+            "count": 425
+          }
+        ],
+        "modelUsage": [
+          {
+            "model": "Gemini",
+            "percentage": 55
+          },
+          {
+            "model": "GPT-4",
+            "percentage": 30
+          },
+          {
+            "model": "Claude",
+            "percentage": 12
+          },
+          {
+            "model": "Grok",
+            "percentage": 3
+          },
+          {
+            "model": "DeepSeek",
+            "percentage": 0
+          }
+        ],
+        "responseTimeDistribution": [
+          {
+            "range": "0-1s",
+            "count": 567
+          },
+          {
+            "range": "1-2s",
+            "count": 789
+          },
+          {
+            "range": "2-3s",
+            "count": 456
+          },
+          {
+            "range": "3-5s",
+            "count": 234
+          },
+          {
+            "range": "5s+",
+            "count": 110
+          }
+        ]
+      },
+      "conversations": [
+        {
+          "id": "conv_003",
+          "userId": "user_789",
+          "startedAt": "2024-01-20T16:00:00Z",
+          "messages": [
+            {
+              "id": "msg_009",
+              "role": "assistant",
+              "content": "Welcome to EduLearn! I'm your personal tutor assistant. I can help with homework, explain concepts, and guide your learning journey.",
+              "timestamp": "2024-01-20T16:00:00Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_010",
+              "role": "user",
+              "content": "Can you help me understand photosynthesis?",
+              "timestamp": "2024-01-20T16:00:20Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_011",
+              "role": "assistant",
+              "content": "Absolutely! Photosynthesis is how plants make their own food using sunlight. Think of it like a plant's kitchen where they cook up glucose (sugar) using three main ingredients: sunlight, water, and carbon dioxide from the air.",
+              "timestamp": "2024-01-20T16:00:25Z",
+              "type": "text",
+              "model": "gemini",
+              "citations": [
+                {
+                  "id": "cite_002",
+                  "title": "Biology Textbook - Chapter 8: Photosynthesis",
+                  "snippet": "6CO2 + 6H2O + light energy → C6H12O6 + 6O2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "health_bot_004": {
+      "id": "health_bot_004",
+      "name": "WellCare Assistant",
+      "targetWebsite": "https://wellcare.health",
+      "createdAt": "2024-01-08T11:20:00Z",
+      "isActive": false,
+      "config": {
+        "theme": {
+          "primaryColor": "#805ad5",
+          "secondaryColor": "#b794f6",
+          "backgroundColor": "#faf5ff",
+          "textColor": "#322659",
+          "fontFamily": "Nunito"
+        },
+        "welcomeMessage": "Hello! I'm WellCare's health assistant. I can provide general health information and help you navigate our services. Remember, I'm not a replacement for professional medical advice.",
+        "botName": "WellCare Assistant",
+        "botAvatar": "/bot-avatar.png",
+        "placeholder": "Ask about health topics or our services...",
+        "borderRadius": 15,
+        "displayMode": "inline",
+        "position": "bottom-right",
+        "size": "large",
+        "width": 450,
+        "height": 700,
+        "zIndex": 9999,
+        "showHeader": true,
+        "showFooter": false,
+        "enableDragDrop": false,
+        "voiceEnabled": true,
+        "defaultVoiceEngine": "elevenlabs",
+        "voiceSpeed": 0.9,
+        "voiceStyle": "professional",
+        "autoPlayResponses": true,
+        "defaultTextModel": "gpt",
+        "temperature": 0.3,
+        "maxTokens": 2048,
+        "streamingEnabled": false,
+        "showTypingIndicator": false,
+        "ragEnabled": true,
+        "showCitations": true,
+        "maxRetrievedDocs": 5,
+        "minRelevanceScore": 0.8,
+        "collectUserInfo": true,
+        "enableAnalytics": true,
+        "allowFileUploads": false
+      },
+      "analytics": {
+        "totalConversations": 634,
+        "totalMessages": 3892,
+        "uniqueUsers": 289,
+        "avgResponseTime": 2.7,
+        "voiceMessages": 456,
+        "textMessages": 3436,
+        "ragQueries": 2134,
+        "satisfaction": 92.8,
+        "activeUsers": 23,
+        "peakHour": "9:00 AM",
+        "popularModel": "GPT-4",
+        "avgSessionDuration": 18.4,
+        "conversationTrends": [
+          {
+            "date": "Mon",
+            "count": 78
+          },
+          {
+            "date": "Tue",
+            "count": 92
+          },
+          {
+            "date": "Wed",
+            "count": 105
+          },
+          {
+            "date": "Thu",
+            "count": 87
+          },
+          {
+            "date": "Fri",
+            "count": 96
+          },
+          {
+            "date": "Sat",
+            "count": 89
+          },
+          {
+            "date": "Sun",
+            "count": 87
+          }
+        ],
+        "modelUsage": [
+          {
+            "model": "GPT-4",
+            "percentage": 78
+          },
+          {
+            "model": "Claude",
+            "percentage": 18
+          },
+          {
+            "model": "Gemini",
+            "percentage": 4
+          },
+          {
+            "model": "Grok",
+            "percentage": 0
+          },
+          {
+            "model": "DeepSeek",
+            "percentage": 0
+          }
+        ],
+        "responseTimeDistribution": [
+          {
+            "range": "0-1s",
+            "count": 123
+          },
+          {
+            "range": "1-2s",
+            "count": 234
+          },
+          {
+            "range": "2-3s",
+            "count": 189
+          },
+          {
+            "range": "3-5s",
+            "count": 67
+          },
+          {
+            "range": "5s+",
+            "count": 21
+          }
+        ]
+      },
+      "conversations": [
+        {
+          "id": "conv_004",
+          "userId": "user_012",
+          "startedAt": "2024-01-20T09:30:00Z",
+          "messages": [
+            {
+              "id": "msg_012",
+              "role": "assistant",
+              "content": "Hello! I'm WellCare's health assistant. I can provide general health information and help you navigate our services. Remember, I'm not a replacement for professional medical advice.",
+              "timestamp": "2024-01-20T09:30:00Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_013",
+              "role": "user",
+              "content": "What are the benefits of regular exercise?",
+              "timestamp": "2024-01-20T09:30:45Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_014",
+              "role": "assistant",
+              "content": "Regular exercise has numerous benefits for both physical and mental health! It helps strengthen your heart, improves circulation, builds muscle strength, enhances bone density, and boosts your immune system. Exercise also releases endorphins which can improve mood and reduce stress.",
+              "timestamp": "2024-01-20T09:30:50Z",
+              "type": "text",
+              "model": "gpt",
+              "citations": [
+                {
+                  "id": "cite_003",
+                  "title": "American Heart Association - Exercise Guidelines",
+                  "snippet": "Regular physical activity can help reduce risk of heart disease and stroke"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "travel_bot_005": {
+      "id": "travel_bot_005",
+      "name": "Wanderlust Travel Guide",
+      "targetWebsite": "https://wanderlusttravel.com",
+      "createdAt": "2024-01-12T14:10:00Z",
+      "isActive": true,
+      "config": {
+        "theme": {
+          "primaryColor": "#ed8936",
+          "secondaryColor": "#f6ad55",
+          "backgroundColor": "#fffaf0",
+          "textColor": "#2d3748",
+          "fontFamily": "Poppins"
+        },
+        "welcomeMessage": "Hello, fellow traveler! 🌍 I'm your Wanderlust guide. Whether you're planning your next adventure or need travel tips, I'm here to help make your journey unforgettable!",
+        "botName": "Wanderlust Guide",
+        "botAvatar": "/bot-avatar.png",
+        "placeholder": "Where would you like to explore?",
+        "borderRadius": 25,
+        "displayMode": "popup",
+        "position": "bottom-right",
+        "size": "small",
+        "width": 320,
+        "height": 480,
+        "zIndex": 9999,
+        "showHeader": true,
+        "showFooter": true,
+        "enableDragDrop": true,
+        "voiceEnabled": true,
+        "defaultVoiceEngine": "openai",
+        "voiceSpeed": 1.1,
+        "voiceStyle": "energetic",
+        "autoPlayResponses": false,
+        "defaultTextModel": "grok",
+        "temperature": 0.8,
+        "maxTokens": 1024,
+        "streamingEnabled": true,
+        "showTypingIndicator": true,
+        "ragEnabled": true,
+        "showCitations": false,
+        "maxRetrievedDocs": 3,
+        "minRelevanceScore": 0.5,
+        "collectUserInfo": false,
+        "enableAnalytics": false,
+        "allowFileUploads": true
+      },
+      "analytics": {
+        "totalConversations": 1678,
+        "totalMessages": 9234,
+        "uniqueUsers": 567,
+        "avgResponseTime": 1.5,
+        "voiceMessages": 3456,
+        "textMessages": 5778,
+        "ragQueries": 4567,
+        "satisfaction": 95.1,
+        "activeUsers": 78,
+        "peakHour": "7:00 PM",
+        "popularModel": "Grok",
+        "avgSessionDuration": 11.2,
+        "conversationTrends": [
+          {
+            "date": "Mon",
+            "count": 187
+          },
+          {
+            "date": "Tue",
+            "count": 203
+          },
+          {
+            "date": "Wed",
+            "count": 234
+          },
+          {
+            "date": "Thu",
+            "count": 245
+          },
+          {
+            "date": "Fri",
+            "count": 289
+          },
+          {
+            "date": "Sat",
+            "count": 312
+          },
+          {
+            "date": "Sun",
+            "count": 208
+          }
+        ],
+        "modelUsage": [
+          {
+            "model": "Grok",
+            "percentage": 60
+          },
+          {
+            "model": "GPT-4",
+            "percentage": 25
+          },
+          {
+            "model": "Gemini",
+            "percentage": 10
+          },
+          {
+            "model": "Claude",
+            "percentage": 5
+          },
+          {
+            "model": "DeepSeek",
+            "percentage": 0
+          }
+        ],
+        "responseTimeDistribution": [
+          {
+            "range": "0-1s",
+            "count": 678
+          },
+          {
+            "range": "1-2s",
+            "count": 543
+          },
+          {
+            "range": "2-3s",
+            "count": 234
+          },
+          {
+            "range": "3-5s",
+            "count": 123
+          },
+          {
+            "range": "5s+",
+            "count": 100
+          }
+        ]
+      },
+      "conversations": [
+        {
+          "id": "conv_005",
+          "userId": "user_345",
+          "startedAt": "2024-01-20T19:15:00Z",
+          "messages": [
+            {
+              "id": "msg_015",
+              "role": "assistant",
+              "content": "Hello, fellow traveler! 🌍 I'm your Wanderlust guide. Whether you're planning your next adventure or need travel tips, I'm here to help make your journey unforgettable!",
+              "timestamp": "2024-01-20T19:15:00Z",
+              "type": "text"
+            },
+            {
+              "id": "msg_016",
+              "role": "user",
+              "content": "I want to plan a 2-week trip to Japan in spring",
+              "timestamp": "2024-01-20T19:15:30Z",
+              "type": "voice"
+            },
+            {
+              "id": "msg_017",
+              "role": "assistant",
+              "content": "What an amazing choice! Spring in Japan is absolutely magical with cherry blossoms (sakura) blooming everywhere! 🌸 For a 2-week itinerary, I'd suggest starting in Tokyo for 5-6 days, then Kyoto for 4-5 days, and maybe Osaka or Hiroshima for the remaining time. When exactly in spring are you thinking?",
+              "timestamp": "2024-01-20T19:15:35Z",
+              "type": "text",
+              "model": "grok"
+            }
+          ]
+        }
+      ]
+    },
+    "chatbot_1761325896985_oyxlfc": {
+      "name": "WorkerBull Assistant",
+      "description": "Chat Assistant  for WorkerBull App",
+      "targetWebsite": "https://workerbull.com",
+      "config": {
+        "theme": {
+          "primaryColor": "#3b82f6",
+          "secondaryColor": "#8b5cf6",
+          "backgroundColor": "#ffffff",
+          "textColor": "#1f2937",
+          "fontFamily": "Outfit"
+        },
+        "welcomeMessage": "Hi! I'm WorkerBull Assistant. How can I help you today?",
+        "botName": "WorkerBull Assistant",
+        "botAvatar": "/bot-avatar.png",
+        "placeholder": "Type your message...",
+        "borderRadius": 12,
+        "displayMode": "popup",
+        "position": "bottom-right",
+        "size": "medium",
+        "width": 380,
+        "height": 560,
+        "zIndex": 9999,
+        "showHeader": true,
+        "showFooter": true,
+        "enableDragDrop": true,
+        "voiceEnabled": true,
+        "defaultVoiceEngine": "openai",
+        "voiceSpeed": 1,
+        "voiceStyle": "friendly",
+        "autoPlayResponses": false,
+        "defaultTextModel": "gpt",
+        "temperature": 0.7,
+        "maxTokens": 1024,
+        "streamingEnabled": true,
+        "showTypingIndicator": true,
+        "ragEnabled": true,
+        "showCitations": true,
+        "maxRetrievedDocs": 3,
+        "minRelevanceScore": 0.5,
+        "collectUserInfo": false,
+        "enableAnalytics": true,
+        "allowFileUploads": false
+      },
+      "id": "chatbot_1761325896985_oyxlfc",
+      "createdAt": "2025-10-24T17:11:36.985Z",
+      "isActive": true,
+      "analytics": {
+        "totalConversations": 0,
+        "totalMessages": 0,
+        "uniqueUsers": 0,
+        "avgResponseTime": 0,
+        "voiceMessages": 0,
+        "textMessages": 0,
+        "ragQueries": 0,
+        "satisfaction": 0,
+        "activeUsers": 0,
+        "peakHour": "12:00 PM",
+        "popularModel": "GPT-4",
+        "avgSessionDuration": 0,
+        "conversationTrends": [
+          {
+            "date": "Mon",
+            "count": 0
+          },
+          {
+            "date": "Tue",
+            "count": 0
+          },
+          {
+            "date": "Wed",
+            "count": 0
+          },
+          {
+            "date": "Thu",
+            "count": 0
+          },
+          {
+            "date": "Fri",
+            "count": 0
+          },
+          {
+            "date": "Sat",
+            "count": 0
+          },
+          {
+            "date": "Sun",
+            "count": 0
+          }
+        ],
+        "modelUsage": [
+          {
+            "model": "GPT-4",
+            "percentage": 0
+          },
+          {
+            "model": "Claude",
+            "percentage": 0
+          },
+          {
+            "model": "Gemini",
+            "percentage": 0
+          },
+          {
+            "model": "Grok",
+            "percentage": 0
+          },
+          {
+            "model": "DeepSeek",
+            "percentage": 0
+          }
+        ],
+        "responseTimeDistribution": [
+          {
+            "range": "0-1s",
+            "count": 0
+          },
+          {
+            "range": "1-2s",
+            "count": 0
+          },
+          {
+            "range": "2-3s",
+            "count": 0
+          },
+          {
+            "range": "3-5s",
+            "count": 0
+          },
+          {
+            "range": "5s+",
+            "count": 0
+          }
+        ]
+      },
+      "conversations": []
+    }
+  }
+}

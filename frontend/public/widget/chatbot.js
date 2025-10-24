@@ -39,6 +39,9 @@
 
   // Widget initialization function
   window.initChatWidget = function(userConfig = {}) {
+    // Store config globally for API calls
+    window.chatWidgetConfig = userConfig;
+    
     // If chatbotId is provided, fetch configuration from server
     if (userConfig.chatbotId) {
       fetchChatbotConfig(userConfig.chatbotId)
@@ -62,12 +65,22 @@
   // Fetch chatbot configuration from server
   async function fetchChatbotConfig(chatbotId) {
     try {
-      const response = await fetch(`http://localhost:3001/api/chatbots/${chatbotId}/config`);
+      // Use full API URL if provided, otherwise construct from base URL
+      let apiUrl;
+      if (window.chatWidgetConfig?.apiUrl) {
+        apiUrl = window.chatWidgetConfig.apiUrl;
+      } else {
+        const apiBaseUrl = window.chatWidgetConfig?.apiBaseUrl || window.location.origin;
+        apiUrl = `${apiBaseUrl}/api/embed/${chatbotId}`;
+      }
+      console.log('Widget: Fetching chatbot config from:', apiUrl);
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      return data.config;
+      console.log('Widget: Received chatbot config:', data);
+      return data.config || data;
     } catch (error) {
       console.error('Error fetching chatbot config:', error);
       throw error;

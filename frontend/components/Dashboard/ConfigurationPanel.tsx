@@ -16,8 +16,20 @@ interface ConfigurationPanelProps {
 
 export default function ConfigurationPanel({ config, onConfigUpdate }: ConfigurationPanelProps) {
   const updateTheme = (key: keyof WidgetConfig['theme'], value: string) => {
+    const defaultTheme = {
+      primaryColor: '#3b82f6',
+      secondaryColor: '#8b5cf6',
+      backgroundColor: '#ffffff',
+      textColor: '#1f2937',
+      fontFamily: 'Outfit'
+    }
+    
     onConfigUpdate({
-      theme: { ...config.theme, [key]: value }
+      theme: { 
+        ...defaultTheme,
+        ...config?.theme, 
+        [key]: value 
+      }
     })
   }
 
@@ -58,13 +70,13 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                   <Input
                     id="primaryColor"
                     type="color"
-                    value={config.theme.primaryColor}
+                    value={config?.theme?.primaryColor || '#3b82f6'}
                     onChange={(e) => updateTheme('primaryColor', e.target.value)}
                     className="w-20 h-10"
                   />
                   <Input
                     type="text"
-                    value={config.theme.primaryColor}
+                    value={config?.theme?.primaryColor || '#3b82f6'}
                     onChange={(e) => updateTheme('primaryColor', e.target.value)}
                     className="flex-1"
                   />
@@ -77,13 +89,13 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                   <Input
                     id="secondaryColor"
                     type="color"
-                    value={config.theme.secondaryColor}
+                    value={config?.theme?.secondaryColor || '#8b5cf6'}
                     onChange={(e) => updateTheme('secondaryColor', e.target.value)}
                     className="w-20 h-10"
                   />
                   <Input
                     type="text"
-                    value={config.theme.secondaryColor}
+                    value={config?.theme?.secondaryColor || '#8b5cf6'}
                     onChange={(e) => updateTheme('secondaryColor', e.target.value)}
                     className="flex-1"
                   />
@@ -96,13 +108,13 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                   <Input
                     id="backgroundColor"
                     type="color"
-                    value={config.theme.backgroundColor}
+                    value={config?.theme?.backgroundColor || '#ffffff'}
                     onChange={(e) => updateTheme('backgroundColor', e.target.value)}
                     className="w-20 h-10"
                   />
                   <Input
                     type="text"
-                    value={config.theme.backgroundColor}
+                    value={config?.theme?.backgroundColor || '#ffffff'}
                     onChange={(e) => updateTheme('backgroundColor', e.target.value)}
                     className="flex-1"
                   />
@@ -115,13 +127,13 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                   <Input
                     id="textColor"
                     type="color"
-                    value={config.theme.textColor}
+                    value={config?.theme?.textColor || '#1f2937'}
                     onChange={(e) => updateTheme('textColor', e.target.value)}
                     className="w-20 h-10"
                   />
                   <Input
                     type="text"
-                    value={config.theme.textColor}
+                    value={config?.theme?.textColor || '#1f2937'}
                     onChange={(e) => updateTheme('textColor', e.target.value)}
                     className="flex-1"
                   />
@@ -134,7 +146,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="welcomeMessage">Welcome Message</Label>
                 <Input
                   id="welcomeMessage"
-                  value={config.welcomeMessage}
+                  value={config?.welcomeMessage || ''}
                   onChange={(e) => onConfigUpdate({ welcomeMessage: e.target.value })}
                   className="mt-1"
                   placeholder="Enter welcome message..."
@@ -145,7 +157,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="botName">Bot Name</Label>
                 <Input
                   id="botName"
-                  value={config.botName}
+                  value={config?.botName || ''}
                   onChange={(e) => onConfigUpdate({ botName: e.target.value })}
                   className="mt-1"
                   placeholder="Enter bot name..."
@@ -156,7 +168,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <div>
                   <Label htmlFor="displayMode">Display Mode</Label>
                   <Select
-                    value={config.displayMode}
+                    value={config?.displayMode || 'popup'}
                     onValueChange={(value: any) => onConfigUpdate({ displayMode: value })}
                   >
                     <SelectTrigger className="mt-1">
@@ -173,7 +185,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <div>
                   <Label htmlFor="position">Position</Label>
                   <Select
-                    value={config.position}
+                    value={config?.position || 'bottom-right'}
                     onValueChange={(value: any) => onConfigUpdate({ position: value })}
                   >
                     <SelectTrigger className="mt-1">
@@ -192,7 +204,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
               <div>
                 <Label htmlFor="size">Widget Size</Label>
                 <Select
-                  value={config.size}
+                  value={config?.size || 'medium'}
                   onValueChange={(value: any) => onConfigUpdate({ size: value })}
                 >
                   <SelectTrigger className="mt-1">
@@ -218,7 +230,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="voiceEnabled">Enable Voice</Label>
                 <Switch
                   id="voiceEnabled"
-                  checked={config.voiceEnabled}
+                  checked={config?.voiceEnabled || false}
                   onCheckedChange={(checked) => onConfigUpdate({ voiceEnabled: checked })}
                 />
               </div>
@@ -226,7 +238,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
               <div>
                 <Label htmlFor="defaultVoiceEngine">Default Voice Engine</Label>
                 <Select
-                  value={config.defaultVoiceEngine}
+                  value={config?.defaultVoiceEngine || 'openai'}
                   onValueChange={(value: any) => onConfigUpdate({ defaultVoiceEngine: value })}
                 >
                   <SelectTrigger className="mt-1">
@@ -240,13 +252,13 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
               </div>
 
               <div>
-                <Label htmlFor="voiceSpeed">Voice Speed: {config.voiceSpeed}x</Label>
+                <Label htmlFor="voiceSpeed">Voice Speed: {config?.voiceSpeed || 1.0}x</Label>
                 <Slider
                   id="voiceSpeed"
                   min={0.5}
                   max={2}
                   step={0.1}
-                  value={[config.voiceSpeed]}
+                  value={[config?.voiceSpeed || 1.0]}
                   onValueChange={([value]) => onConfigUpdate({ voiceSpeed: value })}
                   className="mt-2"
                 />
@@ -255,7 +267,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
               <div>
                 <Label htmlFor="voiceStyle">Voice Style</Label>
                 <Select
-                  value={config.voiceStyle}
+                  value={config?.voiceStyle || 'friendly'}
                   onValueChange={(value) => onConfigUpdate({ voiceStyle: value })}
                 >
                   <SelectTrigger className="mt-1">
@@ -274,7 +286,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="autoPlayResponses">Auto-play Voice Responses</Label>
                 <Switch
                   id="autoPlayResponses"
-                  checked={config.autoPlayResponses}
+                  checked={config?.autoPlayResponses || false}
                   onCheckedChange={(checked) => onConfigUpdate({ autoPlayResponses: checked })}
                 />
               </div>
@@ -290,7 +302,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
               <div>
                 <Label htmlFor="defaultTextModel">Default Text Model</Label>
                 <Select
-                  value={config.defaultTextModel}
+                  value={config?.defaultTextModel || 'gpt'}
                   onValueChange={(value: any) => onConfigUpdate({ defaultTextModel: value })}
                 >
                   <SelectTrigger className="mt-1">
@@ -310,7 +322,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="streamingEnabled">Enable Streaming</Label>
                 <Switch
                   id="streamingEnabled"
-                  checked={config.streamingEnabled}
+                  checked={config?.streamingEnabled || true}
                   onCheckedChange={(checked) => onConfigUpdate({ streamingEnabled: checked })}
                 />
               </div>
@@ -319,7 +331,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="showTypingIndicator">Show Typing Indicator</Label>
                 <Switch
                   id="showTypingIndicator"
-                  checked={config.showTypingIndicator}
+                  checked={config?.showTypingIndicator || true}
                   onCheckedChange={(checked) => onConfigUpdate({ showTypingIndicator: checked })}
                 />
               </div>
@@ -336,7 +348,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="ragEnabled">Enable RAG</Label>
                 <Switch
                   id="ragEnabled"
-                  checked={config.ragEnabled}
+                  checked={config?.ragEnabled || true}
                   onCheckedChange={(checked) => onConfigUpdate({ ragEnabled: checked })}
                 />
               </div>
@@ -345,19 +357,19 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="showCitations">Show Citations</Label>
                 <Switch
                   id="showCitations"
-                  checked={config.showCitations}
+                  checked={config?.showCitations || true}
                   onCheckedChange={(checked) => onConfigUpdate({ showCitations: checked })}
                 />
               </div>
 
               <div>
-                <Label htmlFor="maxRetrievedDocs">Max Retrieved Documents: {config.maxRetrievedDocs}</Label>
+                <Label htmlFor="maxRetrievedDocs">Max Retrieved Documents: {config?.maxRetrievedDocs || 3}</Label>
                 <Slider
                   id="maxRetrievedDocs"
                   min={1}
                   max={10}
                   step={1}
-                  value={[config.maxRetrievedDocs]}
+                  value={[config?.maxRetrievedDocs || 3]}
                   onValueChange={([value]) => onConfigUpdate({ maxRetrievedDocs: value })}
                   className="mt-2"
                 />
@@ -375,7 +387,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="collectUserInfo">Collect User Information</Label>
                 <Switch
                   id="collectUserInfo"
-                  checked={config.collectUserInfo}
+                  checked={config?.collectUserInfo || false}
                   onCheckedChange={(checked) => onConfigUpdate({ collectUserInfo: checked })}
                 />
               </div>
@@ -384,7 +396,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="enableAnalytics">Enable Analytics</Label>
                 <Switch
                   id="enableAnalytics"
-                  checked={config.enableAnalytics}
+                  checked={config?.enableAnalytics || false}
                   onCheckedChange={(checked) => onConfigUpdate({ enableAnalytics: checked })}
                 />
               </div>
@@ -393,7 +405,7 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 <Label htmlFor="allowFileUploads">Allow File Uploads</Label>
                 <Switch
                   id="allowFileUploads"
-                  checked={config.allowFileUploads}
+                  checked={config?.allowFileUploads || false}
                   onCheckedChange={(checked) => onConfigUpdate({ allowFileUploads: checked })}
                 />
               </div>

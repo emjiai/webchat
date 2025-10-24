@@ -74,22 +74,33 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Load the first available chatbot on mount
-    const chatbots = chatbotStore.getAllChatbots()
-    if (chatbots.length > 0) {
-      setSelectedChatbot(chatbots[0])
+    const loadChatbots = async () => {
+      console.log('Dashboard: Loading chatbots...')
+      const chatbots = await chatbotStore.getAllChatbots()
+      console.log('Dashboard: Loaded chatbots:', chatbots.length, chatbots)
+      if (chatbots.length > 0) {
+        console.log('Dashboard: First chatbot config:', chatbots[0].config)
+        setSelectedChatbot(chatbots[0])
+      }
     }
+    loadChatbots()
   }, [])
 
-  const handleConfigUpdate = (updates: Partial<WidgetConfig>) => {
+  const handleConfigUpdate = async (updates: Partial<WidgetConfig>) => {
     if (!selectedChatbot) return
     
-    const updatedChatbot = chatbotStore.updateChatbotConfig(selectedChatbot.id, updates)
+    const updatedChatbot = await chatbotStore.updateChatbotConfig(selectedChatbot.id, updates)
     if (updatedChatbot) {
       setSelectedChatbot(updatedChatbot)
     }
   }
 
   const handleSelectChatbot = (chatbot: Chatbot) => {
+    console.log('Dashboard: Selected chatbot:', chatbot)
+    console.log('Dashboard: Chatbot config:', chatbot.config)
+    console.log('Dashboard: Welcome message:', chatbot.config?.welcomeMessage)
+    console.log('Dashboard: Bot name:', chatbot.config?.botName)
+    
     setSelectedChatbot(chatbot)
     // Switch to configuration tab when a chatbot is selected
     if (activeTab === 'chatbots') {
@@ -131,7 +142,7 @@ export default function DashboardPage() {
                 <div 
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
                   style={{ 
-                    background: `linear-gradient(135deg, ${selectedChatbot.config.theme.primaryColor}, ${selectedChatbot.config.theme.secondaryColor})` 
+                    background: `linear-gradient(135deg, ${selectedChatbot.config?.theme?.primaryColor || defaultConfig.theme.primaryColor}, ${selectedChatbot.config?.theme?.secondaryColor || defaultConfig.theme.secondaryColor})` 
                   }}
                 >
                   <Bot className="w-4 h-4" />
@@ -189,7 +200,7 @@ export default function DashboardPage() {
           <TabsContent value="configuration" className="mt-6">
             {selectedChatbot && (
               <ConfigurationPanel 
-                config={selectedChatbot.config} 
+                config={selectedChatbot.config || defaultConfig} 
                 onConfigUpdate={handleConfigUpdate}
               />
             )}
@@ -197,14 +208,19 @@ export default function DashboardPage() {
 
           <TabsContent value="preview" className="mt-6">
             {selectedChatbot && (
-              <PreviewPanel config={selectedChatbot.config} />
+              <PreviewPanel 
+                config={{
+                  ...(selectedChatbot.config || defaultConfig),
+                  botName: selectedChatbot.config?.botName || selectedChatbot.name || 'AI Assistant'
+                }} 
+              />
             )}
           </TabsContent>
 
           <TabsContent value="embed" className="mt-6">
             {selectedChatbot && (
               <EmbedCodeGenerator 
-                config={selectedChatbot.config} 
+                config={selectedChatbot.config || defaultConfig} 
                 chatbotId={selectedChatbot.id}
                 chatbotName={selectedChatbot.name}
               />
@@ -214,7 +230,7 @@ export default function DashboardPage() {
           <TabsContent value="customize" className="mt-6">
             {selectedChatbot && (
               <WidgetCustomizer 
-                config={selectedChatbot.config}
+                config={selectedChatbot.config || defaultConfig}
                 onConfigChange={handleConfigUpdate}
               />
             )}
@@ -223,7 +239,7 @@ export default function DashboardPage() {
           <TabsContent value="theme" className="mt-6">
             {selectedChatbot && (
               <ThemeEditor 
-                config={selectedChatbot.config}
+                config={selectedChatbot.config || defaultConfig}
                 onConfigUpdate={handleConfigUpdate}
               />
             )}
@@ -232,7 +248,7 @@ export default function DashboardPage() {
           <TabsContent value="voice" className="mt-6">
             {selectedChatbot && (
               <VoiceSettings 
-                config={selectedChatbot.config}
+                config={selectedChatbot.config || defaultConfig}
                 onConfigUpdate={handleConfigUpdate}
               />
             )}

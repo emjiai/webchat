@@ -7,6 +7,11 @@ export interface Chatbot {
   createdAt: Date
   updatedAt: Date
   config: WidgetConfig
+  // Optional theme for list view (contains subset of config.theme)
+  theme?: {
+    primaryColor: string
+    secondaryColor: string
+  }
 }
 
 export interface WidgetConfig {

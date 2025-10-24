@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { chatbotStore } from '@/lib/chatbot-store'
+import { serverChatbotStore } from '@/lib/chatbot-store-server'
 
 export async function GET(
   request: NextRequest,
@@ -7,9 +7,13 @@ export async function GET(
 ) {
   try {
     const chatbotId = params.id
+    console.log('API: Fetching chatbot config for ID:', chatbotId)
 
-    // Get chatbot from store
-    const chatbot = chatbotStore.getChatbot(chatbotId)
+    // Debug: List all available chatbots
+    await serverChatbotStore.debugListChatbots()
+
+    // Get chatbot from server store
+    const chatbot = await serverChatbotStore.getChatbot(chatbotId)
     
     if (!chatbot) {
       return NextResponse.json(

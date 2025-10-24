@@ -43,7 +43,7 @@ export default function SettingsPanel({
           <div>
             <Label htmlFor="textModel" className="text-sm">Text Model</Label>
             <Select
-              value={config.defaultTextModel}
+              value={config?.defaultTextModel || 'gpt'}
               onValueChange={(value: any) => onConfigUpdate({ defaultTextModel: value })}
             >
               <SelectTrigger id="textModel" className="mt-1">
@@ -60,7 +60,7 @@ export default function SettingsPanel({
           </div>
 
           {/* Voice Engine Selection */}
-          {config.voiceEnabled && (
+          {config?.voiceEnabled && (
             <div>
               <Label htmlFor="voiceEngine" className="text-sm">Voice Engine</Label>
               <Select
@@ -86,7 +86,7 @@ export default function SettingsPanel({
               <Label htmlFor="streaming" className="text-sm">Streaming Responses</Label>
               <Switch
                 id="streaming"
-                checked={config.streamingEnabled}
+                checked={config?.streamingEnabled || true}
                 onCheckedChange={(checked) => onConfigUpdate({ streamingEnabled: checked })}
               />
             </div>
@@ -95,7 +95,7 @@ export default function SettingsPanel({
               <Label htmlFor="autoPlay" className="text-sm">Auto-play Voice</Label>
               <Switch
                 id="autoPlay"
-                checked={config.autoPlayResponses}
+                checked={config?.autoPlayResponses || false}
                 onCheckedChange={(checked) => onConfigUpdate({ autoPlayResponses: checked })}
               />
             </div>
@@ -104,7 +104,7 @@ export default function SettingsPanel({
               <Label htmlFor="citations" className="text-sm">Show Citations</Label>
               <Switch
                 id="citations"
-                checked={config.showCitations}
+                checked={config?.showCitations || true}
                 onCheckedChange={(checked) => onConfigUpdate({ showCitations: checked })}
               />
             </div>
@@ -113,7 +113,7 @@ export default function SettingsPanel({
               <Label htmlFor="rag" className="text-sm">Enable RAG</Label>
               <Switch
                 id="rag"
-                checked={config.ragEnabled}
+                checked={config?.ragEnabled || true}
                 onCheckedChange={(checked) => onConfigUpdate({ ragEnabled: checked })}
               />
             </div>

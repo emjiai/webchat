@@ -56,7 +56,7 @@ export default function MessageList({ messages, isLoading, config, onPlayVoice }
               )}
 
               {/* Citations */}
-              {message.citations && message.citations.length > 0 && config.showCitations && (
+              {message.citations && message.citations.length > 0 && config?.showCitations && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <div className="flex items-center gap-1 mb-2 text-xs font-medium">
                     <FileText className="w-3 h-3" />
@@ -77,7 +77,7 @@ export default function MessageList({ messages, isLoading, config, onPlayVoice }
             </div>
 
             {/* Action buttons */}
-            {message.role === 'assistant' && config.voiceEnabled && (
+            {message.role === 'assistant' && config?.voiceEnabled && (
               <div className="mt-2">
                 <button
                   onClick={() => onPlayVoice(message.content)}

@@ -17,18 +17,19 @@ export default function EmbedCodeGenerator({ config, chatbotId, chatbotName }: E
   const [embedMethod, setEmbedMethod] = useState<'script' | 'npm' | 'react'>('script')
 
   const generateScriptEmbed = () => {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3005'
     return `<!-- ${chatbotName} - AI Chatbot Widget -->
 <script>
   (function() {
-    // Chatbot Configuration
+    // Minimal Configuration - All settings loaded from webchat server
     window.chatWidgetConfig = {
       chatbotId: '${chatbotId}',
-      // The widget will automatically load the configuration from your server
+      apiUrl: '${baseUrl}/api/embed/${chatbotId}'
     };
 
     // Load Widget Script
     const script = document.createElement('script');
-    script.src = 'http://localhost:3001/widget/chatbot.js';
+    script.src = '${baseUrl}/widget/chatbot.js';
     script.async = true;
     script.onload = function() {
       if (window.initChatWidget) {
@@ -40,7 +41,7 @@ export default function EmbedCodeGenerator({ config, chatbotId, chatbotName }: E
     // Load Widget Styles
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'http://localhost:3001/widget/chatbot.css';
+    link.href = '${baseUrl}/widget/chatbot.css';
     document.head.appendChild(link);
   })();
 </script>

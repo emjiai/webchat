@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Chatbot } from '@/types/widget'
 import { useChatbotStore } from '@/lib/chatbot-store'
 import { Bot, Plus, Edit3, Copy, Trash2, Globe, Power, Settings, MoreVertical } from 'lucide-react'
@@ -13,65 +13,100 @@ interface ChatbotManagerProps {
 
 export default function ChatbotManager({ onSelectChatbot, selectedChatbotId }: ChatbotManagerProps) {
   const chatbotStoreHook = useChatbotStore()
-  const [chatbots, setChatbots] = useState<Chatbot[]>(() => chatbotStoreHook.getAllChatbots())
+  const [chatbots, setChatbots] = useState<Chatbot[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [newChatbotName, setNewChatbotName] = useState('')
   const [newChatbotDescription, setNewChatbotDescription] = useState('')
   const [newChatbotWebsite, setNewChatbotWebsite] = useState('')
 
-  const refreshChatbots = () => {
-    setChatbots(chatbotStoreHook.getAllChatbots())
-  }
-
-  const handleCreateChatbot = () => {
-    if (!newChatbotName.trim()) return
-
-    const newChatbot = chatbotStoreHook.createChatbot(
-      newChatbotName.trim(),
-      newChatbotDescription.trim() || undefined,
-      newChatbotWebsite.trim() || undefined
-    )
-
-    setNewChatbotName('')
-    setNewChatbotDescription('')
-    setNewChatbotWebsite('')
-    setShowCreateModal(false)
+  useEffect(() => {
     refreshChatbots()
-    onSelectChatbot(newChatbot)
-  }
+  }, [])
 
-  const handleCloneChatbot = (chatbot: Chatbot) => {
-    const clonedChatbot = chatbotStoreHook.cloneChatbot(chatbot.id, `${chatbot.name} (Copy)`)
-    if (clonedChatbot) {
-      refreshChatbots()
-      onSelectChatbot(clonedChatbot)
+  const refreshChatbots = async () => {
+    setIsLoading(true)
+    try {
+      const allChatbots = await chatbotStoreHook.getAllChatbots()
+      setChatbots(allChatbots)
+    } catch (error) {
+      console.error('Error loading chatbots:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleDeleteChatbot = (chatbotId: string) => {
+  const handleCreateChatbot = async () => {
+    if (!newChatbotName.trim()) return
+
+    try {
+      const newChatbot = await chatbotStoreHook.createChatbot(
+        newChatbotName.trim(),
+        newChatbotDescription.trim() || undefined,
+        newChatbotWebsite.trim() || undefined
+      )
+
+      setNewChatbotName('')
+      setNewChatbotDescription('')
+      setNewChatbotWebsite('')
+      setShowCreateModal(false)
+      await refreshChatbots()
+      onSelectChatbot(newChatbot)
+    } catch (error) {
+      console.error('Error creating chatbot:', error)
+      alert('Failed to create chatbot. Please try again.')
+    }
+  }
+
+  const handleCloneChatbot = async (chatbot: Chatbot) => {
+    try {
+      const clonedChatbot = await chatbotStoreHook.cloneChatbot(chatbot.id, `${chatbot.name} (Copy)`)
+      if (clonedChatbot) {
+        await refreshChatbots()
+        onSelectChatbot(clonedChatbot)
+      }
+    } catch (error) {
+      console.error('Error cloning chatbot:', error)
+      alert('Failed to clone chatbot. Please try again.')
+    }
+  }
+
+  const handleDeleteChatbot = async (chatbotId: string) => {
     if (chatbotId === 'default') {
       alert('Cannot delete the default chatbot')
       return
     }
 
     if (confirm('Are you sure you want to delete this chatbot? This action cannot be undone.')) {
-      chatbotStoreHook.deleteChatbot(chatbotId)
-      refreshChatbots()
-      
-      // If deleted chatbot was selected, select the first available one
-      if (selectedChatbotId === chatbotId) {
-        const remaining = chatbotStoreHook.getAllChatbots()
-        if (remaining.length > 0) {
-          onSelectChatbot(remaining[0])
+      try {
+        const success = await chatbotStoreHook.deleteChatbot(chatbotId)
+        if (success) {
+          await refreshChatbots()
+          
+          // If deleted chatbot was selected, select the first available one
+          if (selectedChatbotId === chatbotId) {
+            const remaining = await chatbotStoreHook.getAllChatbots()
+            if (remaining.length > 0) {
+              onSelectChatbot(remaining[0])
+            }
+          }
         }
+      } catch (error) {
+        console.error('Error deleting chatbot:', error)
+        alert('Failed to delete chatbot. Please try again.')
       }
     }
   }
 
-  const handleToggleStatus = (chatbotId: string) => {
-    const updatedChatbot = chatbotStoreHook.toggleChatbotStatus(chatbotId)
-    if (updatedChatbot) {
-      refreshChatbots()
+  const handleToggleStatus = async (chatbotId: string) => {
+    try {
+      const updatedChatbot = await chatbotStoreHook.toggleChatbotStatus(chatbotId)
+      if (updatedChatbot) {
+        await refreshChatbots()
+      }
+    } catch (error) {
+      console.error('Error toggling chatbot status:', error)
+      alert('Failed to update chatbot status. Please try again.')
     }
   }
 
@@ -92,8 +127,16 @@ export default function ChatbotManager({ onSelectChatbot, selectedChatbotId }: C
       </div>
 
       {/* Chatbots Grid */}
-      <div className="grid gap-4">
-        {chatbots.map((chatbot) => (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading chatbots...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {chatbots.map((chatbot) => (
           <motion.div
             key={chatbot.id}
             layout
@@ -109,7 +152,7 @@ export default function ChatbotManager({ onSelectChatbot, selectedChatbotId }: C
                 <div 
                   className="w-12 h-12 rounded-lg flex items-center justify-center text-white"
                   style={{ 
-                    background: `linear-gradient(135deg, ${chatbot.config.theme.primaryColor}, ${chatbot.config.theme.secondaryColor})` 
+                    background: `linear-gradient(135deg, ${chatbot.theme?.primaryColor || '#3b82f6'}, ${chatbot.theme?.secondaryColor || '#8b5cf6'})` 
                   }}
                 >
                   <Bot className="w-6 h-6" />
@@ -135,8 +178,8 @@ export default function ChatbotManager({ onSelectChatbot, selectedChatbotId }: C
                     </div>
                   )}
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                    <span>Created {chatbot.createdAt.toLocaleDateString()}</span>
-                    <span>Updated {chatbot.updatedAt.toLocaleDateString()}</span>
+                    <span>Created {new Date(chatbot.createdAt).toLocaleDateString()}</span>
+                    <span>Updated {new Date(chatbot.updatedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -182,10 +225,11 @@ export default function ChatbotManager({ onSelectChatbot, selectedChatbotId }: C
               </div>
             </div>
           </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {chatbots.length === 0 && (
+      {!isLoading && chatbots.length === 0 && (
         <div className="text-center py-12 text-gray-500">
           <Bot className="w-12 h-12 mx-auto mb-4 text-gray-300" />
           <p className="text-lg font-medium mb-2">No chatbots yet</p>
