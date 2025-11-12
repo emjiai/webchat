@@ -97,7 +97,8 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
         content,
         currentConfig?.defaultTextModel || 'gpt',
         currentConfig?.ragEnabled || true,
-        currentConfig?.id || 'default' // Pass chatbot ID
+        currentConfig?.id || 'default', // Pass chatbot ID
+        currentConfig?.ragCorpusId // Pass corpus ID for RAG
       )
 
       const assistantMessage: Message = {

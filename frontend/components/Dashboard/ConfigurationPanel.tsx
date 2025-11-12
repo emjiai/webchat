@@ -1,13 +1,18 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { WidgetConfig } from '@/types/widget'
+import { Corpus } from '@/types/rag'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Palette, Mic, MessageSquare, Database, Settings2 } from 'lucide-react'
+import { Palette, Mic, MessageSquare, Database, Settings2, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { getCorpora } from '@/lib/rag-api'
+import { useToast } from '@/hooks/use-toast'
 
 interface ConfigurationPanelProps {
   config: WidgetConfig
@@ -15,6 +20,32 @@ interface ConfigurationPanelProps {
 }
 
 export default function ConfigurationPanel({ config, onConfigUpdate }: ConfigurationPanelProps) {
+  const [corpora, setCorpora] = useState<Corpus[]>([])
+  const [isLoadingCorpora, setIsLoadingCorpora] = useState(true)
+  const { toast } = useToast()
+
+  // Load corpora on mount
+  useEffect(() => {
+    loadCorpora()
+  }, [])
+
+  const loadCorpora = async () => {
+    try {
+      setIsLoadingCorpora(true)
+      const corporaData = await getCorpora(config?.id)
+      setCorpora(corporaData)
+    } catch (error) {
+      console.error('Failed to load corpora:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to load RAG corpora',
+        variant: 'destructive'
+      })
+    } finally {
+      setIsLoadingCorpora(false)
+    }
+  }
+
   const updateTheme = (key: keyof WidgetConfig['theme'], value: string) => {
     const defaultTheme = {
       primaryColor: '#3b82f6',
@@ -353,6 +384,58 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                 />
               </div>
 
+              {/* Corpus Selection */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="ragCorpusId">Knowledge Base</Label>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.open('#rag-management', '_blank')}
+                    className="h-8 text-xs"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Manage
+                  </Button>
+                </div>
+                <Select 
+                  value={config?.ragCorpusId || ''} 
+                  onValueChange={(value) => onConfigUpdate({ ragCorpusId: value })}
+                  disabled={!config?.ragEnabled || isLoadingCorpora}
+                >
+                  <SelectTrigger>
+                    <SelectValue 
+                      placeholder={
+                        isLoadingCorpora 
+                          ? 'Loading corpora...' 
+                          : corpora.length === 0 
+                          ? 'No corpora available. Create one in RAG Management.'
+                          : 'Select a knowledge base'
+                      } 
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {corpora.map(corpus => (
+                      <SelectItem key={corpus.id} value={corpus.id}>
+                        <div className="flex items-center gap-2">
+                          <Database className="w-4 h-4" />
+                          <div>
+                            <div className="font-medium">{corpus.display_name}</div>
+                            <div className="text-xs text-gray-500">
+                              {corpus.document_count} documents
+                            </div>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  Choose which knowledge base the chatbot should use to answer questions. 
+                  Create and manage corpora in the RAG Management section.
+                </p>
+              </div>
+
               <div className="flex items-center justify-between">
                 <Label htmlFor="showCitations">Show Citations</Label>
                 <Switch
@@ -373,6 +456,24 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
                   onValueChange={([value]) => onConfigUpdate({ maxRetrievedDocs: value })}
                   className="mt-2"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="minRelevanceScore">
+                  Minimum Relevance Score: {(config?.minRelevanceScore || 0.5).toFixed(2)}
+                </Label>
+                <Slider
+                  id="minRelevanceScore"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={[config?.minRelevanceScore || 0.5]}
+                  onValueChange={([value]) => onConfigUpdate({ minRelevanceScore: value })}
+                  className="mt-2"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Only show documents with relevance above this threshold
+                </p>
               </div>
             </div>
           </div>

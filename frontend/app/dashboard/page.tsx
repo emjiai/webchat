@@ -9,10 +9,11 @@ import ThemeEditor from '@/components/dashboard/ThemeEditor'
 import VoiceSettings from '@/components/dashboard/VoiceSettings'
 import WidgetCustomizer from '@/components/dashboard/WidgetCustomizer'
 import ChatbotManager from '@/components/dashboard/ChatbotManager'
+import RAGManagement from '@/components/dashboard/RAGManagement'
 import { WidgetConfig, Chatbot } from '@/types/widget'
 import { useChatbotStore } from '@/lib/chatbot-store'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Settings, Eye, Code, ArrowLeft, Bot } from 'lucide-react'
+import { Settings, Eye, Code, ArrowLeft, Bot, Database } from 'lucide-react'
 import Link from 'next/link'
 
 const defaultConfig: WidgetConfig = {
@@ -159,7 +160,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-4xl grid-cols-8">
+          <TabsList className="grid w-full max-w-5xl grid-cols-9">
             <TabsTrigger value="chatbots" className="flex items-center gap-2">
               <Bot className="w-4 h-4" />
               Chatbots
@@ -187,6 +188,10 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex items-center gap-2" disabled={!selectedChatbot}>
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="rag" className="flex items-center gap-2" disabled={!selectedChatbot}>
+              <Database className="w-4 h-4" />
+              RAG Data
             </TabsTrigger>
           </TabsList>
 
@@ -261,6 +266,15 @@ export default function DashboardPage() {
                 timeRange="7d"
                 onRefresh={() => { /* no-op hook for now */ }}
                 onExport={() => { /* no-op hook for now */ }}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="rag" className="mt-6">
+            {selectedChatbot && (
+              <RAGManagement 
+                chatbotId={selectedChatbot.id}
+                chatbotName={selectedChatbot.name}
               />
             )}
           </TabsContent>

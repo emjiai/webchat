@@ -25,12 +25,13 @@ export async function processMessage(
   message: string,
   model: string,
   ragEnabled: boolean,
-  chatbotId: string = 'default'
+  chatbotId: string = 'default',
+  corpusId?: string
 ): Promise<ChatResponse> {
   // Try to use the new RAG API if available and RAG is enabled
   if (ragEnabled && process.env.NEXT_PUBLIC_RAG_API_URL) {
     try {
-      const response = await processMessageWithRAG(message, chatbotId, ragEnabled)
+      const response = await processMessageWithRAG(message, chatbotId, corpusId, ragEnabled)
       return {
         content: response.content,
         citations: response.citations,
@@ -52,23 +53,31 @@ export async function processMessage(
 export async function processMessageWithRAG(
   message: string,
   chatbotId: string,
+  corpusId?: string,
   ragEnabled: boolean = true
 ): Promise<RAGApiResponse> {
   const apiUrl = process.env.NEXT_PUBLIC_RAG_API_URL || 'http://localhost:8000/api/v1'
+  
+  const requestBody: any = {
+    message,
+    chatbot_id: chatbotId,
+    rag_enabled: ragEnabled,
+    max_results: 10,
+    temperature: 0.7,
+    model: 'gemini-2.5-flash'
+  }
+
+  // Include corpus ID if provided
+  if (corpusId && ragEnabled) {
+    requestBody.corpus_id = corpusId
+  }
   
   const response = await fetch(`${apiUrl}/chat/message`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      message,
-      chatbot_id: chatbotId,
-      rag_enabled: ragEnabled,
-      max_results: 10,
-      temperature: 0.7,
-      model: 'gemini-2.5-flash'
-    }),
+    body: JSON.stringify(requestBody),
   })
   
   if (!response.ok) {

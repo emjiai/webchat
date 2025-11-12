@@ -72,6 +72,7 @@ export interface WidgetConfig {
     
     // RAG Settings
     ragEnabled: boolean
+    ragCorpusId?: string  // ID of the corpus to use for RAG
     showCitations: boolean
     maxRetrievedDocs: number
     minRelevanceScore: number
