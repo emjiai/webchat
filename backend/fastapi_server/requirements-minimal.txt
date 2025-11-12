@@ -1,0 +1,27 @@
+# Minimal requirements for testing
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+pydantic-settings
+
+# Google Cloud core dependencies
+google-cloud-aiplatform[adk,agent-engines]
+google-adk
+google-auth
+requests
+
+# Essential FastAPI dependencies
+python-multipart
+python-json-logger
+httpx
+aiohttp
+psutil
+
+# Database dependencies
+sqlalchemy>=2.0.0
+asyncpg
+alembic
+uuid6
+aiosqlite
+aiofiles

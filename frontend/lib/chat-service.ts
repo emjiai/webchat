@@ -5,10 +5,82 @@ import { searchDocuments } from './rag-service'
 interface ChatResponse {
   content: string
   citations?: Citation[]
+  model?: string
+  timestamp?: string
+  processing_time_ms?: number
 }
 
-// Simulate API calls to different AI models
+interface RAGApiResponse {
+  content: string
+  citations: Citation[]
+  model: string
+  timestamp: string
+  chatbot_id: string
+  rag_enabled: boolean
+  processing_time_ms?: number
+}
+
+// Process message with RAG API integration
 export async function processMessage(
+  message: string,
+  model: string,
+  ragEnabled: boolean,
+  chatbotId: string = 'default'
+): Promise<ChatResponse> {
+  // Try to use the new RAG API if available and RAG is enabled
+  if (ragEnabled && process.env.NEXT_PUBLIC_RAG_API_URL) {
+    try {
+      const response = await processMessageWithRAG(message, chatbotId, ragEnabled)
+      return {
+        content: response.content,
+        citations: response.citations,
+        model: response.model,
+        timestamp: response.timestamp,
+        processing_time_ms: response.processing_time_ms
+      }
+    } catch (error) {
+      console.warn('RAG API failed, falling back to local processing:', error)
+      // Fall through to local processing
+    }
+  }
+
+  // Fallback to original local processing
+  return processMessageLocal(message, model, ragEnabled)
+}
+
+// New RAG API integration function
+export async function processMessageWithRAG(
+  message: string,
+  chatbotId: string,
+  ragEnabled: boolean = true
+): Promise<RAGApiResponse> {
+  const apiUrl = process.env.NEXT_PUBLIC_RAG_API_URL || 'http://localhost:8000/api/v1'
+  
+  const response = await fetch(`${apiUrl}/chat/message`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message,
+      chatbot_id: chatbotId,
+      rag_enabled: ragEnabled,
+      max_results: 10,
+      temperature: 0.7,
+      model: 'gemini-2.5-flash'
+    }),
+  })
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(`RAG API error: ${response.statusText} - ${errorData.message || 'Unknown error'}`)
+  }
+  
+  return response.json()
+}
+
+// Original local processing function (renamed)
+async function processMessageLocal(
   message: string,
   model: string,
   ragEnabled: boolean

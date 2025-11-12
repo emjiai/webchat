@@ -96,7 +96,8 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
       const response = await processMessage(
         content,
         currentConfig?.defaultTextModel || 'gpt',
-        currentConfig?.ragEnabled || true
+        currentConfig?.ragEnabled || true,
+        currentConfig?.id || 'default' // Pass chatbot ID
       )
 
       const assistantMessage: Message = {
@@ -106,7 +107,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
         timestamp: new Date(),
         type: 'text',
         citations: response.citations,
-        model: currentConfig?.defaultTextModel || 'gpt'
+        model: response.model || currentConfig?.defaultTextModel || 'gpt'
       }
 
       setMessages(prev => [...prev, assistantMessage])

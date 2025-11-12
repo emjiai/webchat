@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  chatbot-rag-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chatbot-rag-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Google Cloud Configuration
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+      - GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-us-central1}
+      - RAG_CORPUS=${RAG_CORPUS}
+      
+      # API Configuration
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_DEBUG=${API_DEBUG:-false}
+      
+      # CORS Configuration
+      - CORS_ORIGINS=["http://localhost:3005","https://yourdomain.com"]
+      
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      
+      # Security
+      - CHATBOT_API_KEY_PROD=${CHATBOT_API_KEY_PROD}
+      
+    volumes:
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Mount Google Cloud credentials (if using service account file)
+      - ${GOOGLE_APPLICATION_CREDENTIALS:-/dev/null}:/app/credentials/gcp-service-account.json
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # Redis for caching (optional, for production scaling)
+  redis:
+    image: redis:7-alpine
+    container_name: chatbot-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx reverse proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: chatbot-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - chatbot-rag-api
+    profiles:
+      - production
+
+volumes:
+  redis-data:
