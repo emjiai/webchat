@@ -189,6 +189,8 @@ config.ini
 secrets.json
 *.key
 *.pem
+credentials/
+service-account.json
 
 # Docker
 .dockerignore
