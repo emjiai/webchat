@@ -39,12 +39,12 @@ export default function VoiceControls({ voiceEngine, config, onConfigChange }: V
             min="0.5"
             max="2"
             step="0.1"
-            value={config.speechRate}
-            onChange={(e) => onConfigChange?.({ speechRate: Number(e.target.value) })}
+            value={config.voiceSpeed}
+            onChange={(e) => onConfigChange?.({ voiceSpeed: Number(e.target.value) })}
             className="w-full h-1 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
           />
           <div className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
-            {config.speechRate}x
+            {config.voiceSpeed}x
           </div>
         </div>
         

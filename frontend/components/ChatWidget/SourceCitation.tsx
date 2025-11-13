@@ -76,14 +76,14 @@ export default function SourceCitation({ citation, language }: SourceCitationPro
                   <div className="space-y-2">
                     {citation.metadata?.lastUpdated && (
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">{t.lastUpdated}:</span>
+                        <span className="font-medium">{t('lastUpdated', 'Last Updated')}:</span>
                         <span>{new Date(citation.metadata.lastUpdated).toLocaleDateString()}</span>
                       </div>
                     )}
                     
                     {citation.metadata?.version && (
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">{t.version}:</span>
+                        <span className="font-medium">{t('version', 'Version')}:</span>
                         <span>{citation.metadata.version}</span>
                       </div>
                     )}
@@ -91,7 +91,7 @@ export default function SourceCitation({ citation, language }: SourceCitationPro
                     {citation.metadata?.documentId && (
                       <button className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 transition-colors">
                         <ExternalLink className="w-3 h-3" />
-                        <span>{t.viewFullDocument}</span>
+                        <span>{t('viewFullDocument', 'View Full Document')}</span>
                       </button>
                     )}
                   </div>

@@ -5,7 +5,6 @@ import { Plus, Database, Upload } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
 
 import { RAGManagementProps, Corpus, Document, RAGUIState } from '@/types/rag'
 import { getCorpora, getCorpusStats, getDocuments } from '@/lib/rag-api'
@@ -17,6 +16,7 @@ import CorpusList from './rag/CorpusList'
 import CorpusEditor from './rag/CorpusEditor'
 import DocumentUploader from './rag/DocumentUploader'
 import DocumentLibrary from './rag/DocumentLibrary'
+import ErrorBoundary from './ErrorBoundary'
 
 export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementProps) {
   const [uiState, setUIState] = useState<RAGUIState>({
@@ -45,8 +45,6 @@ export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementP
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { toast } = useToast()
-
   // Load corpora on mount
   useEffect(() => {
     loadCorpora()
@@ -73,11 +71,7 @@ export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementP
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load corpora'
       setError(errorMessage)
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive'
-      })
+      console.error('Failed to load corpora:', err)
     } finally {
       setIsLoadingCorpora(false)
     }
@@ -90,11 +84,7 @@ export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementP
       setDocuments(documentsData)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load documents'
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive'
-      })
+      console.error('Failed to load documents:', err)
     } finally {
       setIsLoadingDocuments(false)
     }
@@ -161,7 +151,8 @@ export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementP
 
 
   return (
-    <div className="space-y-6">
+    <ErrorBoundary>
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -207,11 +198,11 @@ export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementP
       )}
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Corpora List */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-4 order-1 lg:order-none">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Corpora</h2>
+            <h2 className="text-base sm:text-lg font-semibold">Corpora</h2>
             <Badge variant="secondary">{corpora.length}</Badge>
           </div>
           
@@ -227,31 +218,31 @@ export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementP
         </div>
 
         {/* Document Management */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4 order-2 lg:order-none">
           {uiState.selectedCorpus ? (
             <>
               {/* Selected Corpus Info */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="w-5 h-5" />
-                    {uiState.selectedCorpus.display_name}
+              <Card className="lg:block">
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Database className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="truncate">{uiState.selectedCorpus.display_name}</span>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm">
                     {uiState.selectedCorpus.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-                    <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
+                    <div className="flex items-center justify-between sm:block">
                       <span className="text-gray-500">Documents:</span>
                       <div className="font-medium">{uiState.selectedCorpus.document_count}</div>
                     </div>
-                    <div>
+                    <div className="flex items-center justify-between sm:block">
                       <span className="text-gray-500">Total Size:</span>
                       <div className="font-medium">{formatFileSize(uiState.selectedCorpus.total_size_bytes)}</div>
                     </div>
-                    <div>
+                    <div className="flex items-center justify-between sm:block">
                       <span className="text-gray-500">Created:</span>
                       <div className="font-medium">{new Date(uiState.selectedCorpus.created_at).toLocaleDateString()}</div>
                     </div>
@@ -306,6 +297,7 @@ export default function RAGManagement({ chatbotId, chatbotName }: RAGManagementP
         onClose={() => setUIState(prev => ({ ...prev, showDocumentUpload: false }))}
         onUploadComplete={handleDocumentsUploaded}
       />
-    </div>
+      </div>
+    </ErrorBoundary>
   )
 }

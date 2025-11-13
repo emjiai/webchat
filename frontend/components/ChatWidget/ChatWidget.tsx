@@ -33,8 +33,9 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
     {
       id: nanoid(),
       role: 'assistant',
-      content: t.welcomeMessage,
+      content: config.welcomeMessage || t('welcomeMessage', 'Hello! How can I help you today?'),
       timestamp: new Date(),
+      type: 'text',
     },
   ]);
   
@@ -46,7 +47,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
   const [showSettings, setShowSettings] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [voiceEngine, setVoiceEngine] = useState<VoiceEngine>(config.defaultVoiceEngine);
-  const [llmProvider, setLLMProvider] = useState<LLMProvider>(config.defaultLLM);
+  const [llmProvider, setLLMProvider] = useState<LLMProvider>(config.defaultTextModel as LLMProvider);
   const [citations, setCitations] = useState<Citation[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,7 +56,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
 
   useEffect(() => {
     // Initialize voice manager with language support
-    voiceManagerRef.current = new VoiceManager(voiceEngine, language);
+    voiceManagerRef.current = new VoiceManager(voiceEngine);
     
     return () => {
       voiceManagerRef.current?.cleanup();
@@ -76,8 +77,9 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
     const welcomeMessage: Message = {
       id: nanoid(),
       role: 'assistant',
-      content: newT.welcomeMessage,
+      content: config.welcomeMessage || newT('welcomeMessage', 'Hello! How can I help you today?'),
       timestamp: new Date(),
+      type: 'text',
     };
     setMessages([welcomeMessage]);
   };
@@ -94,6 +96,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
       role: 'user',
       content,
       timestamp: new Date(),
+      type: inputMode === 'voice' ? 'voice' : 'text',
       inputMode,
     };
 
@@ -104,41 +107,39 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
     try {
       // Step 1: Retrieve relevant documents if RAG is enabled
       let retrievedDocs: Citation[] = [];
-      if (config.enableRAG) {
-        retrievedDocs = await retrieveDocuments(content, {
-          maxResults: config.maxRetrievalResults,
-          minScore: config.minRelevanceScore,
-        });
+      if (config.ragEnabled) {
+        retrievedDocs = await retrieveDocuments(content);
         setCitations(retrievedDocs);
       }
 
       // Step 2: Generate AI response with language context
-      const aiResponse = await simulateLLMResponse({
-        query: content,
-        context: retrievedDocs,
-        provider: llmProvider,
-        language: language,
-        config: {
+      const aiResponse = await simulateLLMResponse(
+        messages.concat([userMessage]),
+        llmProvider,
+        {
+          context: retrievedDocs,
+          language: language,
           temperature: config.temperature,
           maxTokens: config.maxTokens,
-          streaming: config.streamResponses,
-        },
-      });
+          streaming: config.streamingEnabled,
+        }
+      );
 
       const assistantMessage: Message = {
         id: nanoid(),
         role: 'assistant',
-        content: aiResponse.content,
+        content: aiResponse,
         timestamp: new Date(),
+        type: 'text',
         citations: retrievedDocs.length > 0 ? retrievedDocs : undefined,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
 
       // Step 3: Play voice response if enabled
-      if (config.voiceAutoPlay && voiceManagerRef.current) {
+      if (config.autoPlayResponses && voiceManagerRef.current) {
         setIsPlaying(true);
-        await voiceManagerRef.current.textToSpeech(aiResponse.content);
+        await voiceManagerRef.current.speak(aiResponse);
         setIsPlaying(false);
       }
     } catch (error) {
@@ -146,8 +147,9 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
       const errorMessage: Message = {
         id: nanoid(),
         role: 'assistant',
-        content: t.error.generic,
+        content: t('error.generic', 'Sorry, something went wrong. Please try again.'),
         timestamp: new Date(),
+        type: 'text',
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -160,28 +162,28 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
 
     if (isRecording) {
       setIsRecording(false);
-      const text = await voiceManagerRef.current.stopRecording();
+      const text = await voiceManagerRef.current.stopListening();
       if (text) {
         handleSendMessage(text, 'voice');
       }
     } else {
       setIsRecording(true);
-      await voiceManagerRef.current.startRecording();
+      await voiceManagerRef.current.startListening();
     }
   };
 
   const toggleAudioPlayback = () => {
     if (isPlaying && voiceManagerRef.current) {
-      voiceManagerRef.current.stopPlayback();
+      voiceManagerRef.current.stopSpeaking();
       setIsPlaying(false);
     }
   };
 
   const containerClasses = `
     widget-container glass
-    ${config.mode === 'popup' ? 'widget-popup' : ''}
-    ${config.mode === 'inline' ? 'widget-inline' : ''}
-    ${config.mode === 'fullscreen' || isFullscreen ? 'widget-fullscreen' : ''}
+    ${config.displayMode === 'popup' ? 'widget-popup' : ''}
+    ${config.displayMode === 'inline' ? 'widget-inline' : ''}
+    ${config.displayMode === 'fullscreen' || isFullscreen ? 'widget-fullscreen' : ''}
     ${isMinimized ? 'h-16 w-80' : ''}
   `;
 
@@ -200,7 +202,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
           <div className="flex items-center gap-3">
             <div className="relative">
               <img
-                src={config.avatarUrl || '/assets/avatars/default-bot.png'}
+                src={config.botAvatar || '/assets/avatars/default-bot.png'}
                 alt={config.botName}
                 className="w-10 h-10 rounded-full"
               />
@@ -211,7 +213,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
                 {config.botName || 'AI Assistant'}
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {isRecording ? t.listening : isPlaying ? t.speaking : t.online}
+                {isRecording ? t('listening', 'Listening...') : isPlaying ? t('speaking', 'Speaking...') : t('online', 'Online')}
               </p>
             </div>
           </div>
@@ -223,11 +225,11 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
               compact={true}
             />
             
-            {config.enableVoice && (
+            {config.voiceEnabled && (
               <button
                 onClick={toggleAudioPlayback}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                aria-label={isPlaying ? t.mute : t.unmute}
+                aria-label={isPlaying ? t('mute', 'Mute') : t('unmute', 'Unmute')}
               >
                 {isPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
@@ -236,7 +238,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
             <button
               onClick={() => setShowSettings(!showSettings)}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              aria-label={t.settings}
+              aria-label={t('settings', 'Settings')}
               >
               <Settings className="w-4 h-4" />
             </button>
@@ -293,7 +295,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
                         </select>
                       </div>
                       
-                      {config.enableVoice && (
+                      {config.voiceEnabled && (
                         <div>
                           <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
                             Voice Engine
@@ -344,7 +346,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
                   onPlayAudio={() => {
                     if (voiceManagerRef.current && message.role === 'assistant') {
                       setIsPlaying(true);
-                      voiceManagerRef.current.textToSpeech(message.content).then(() => {
+                      voiceManagerRef.current.speak(message.content).then(() => {
                         setIsPlaying(false);
                       });
                     }
@@ -355,7 +357,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
               {isLoading && (
                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">{t.thinking}</span>
+                  <span className="text-sm">{t('thinking', 'Thinking...')}</span>
                   <div className="typing-indicator">
                     <span></span>
                     <span></span>
@@ -368,7 +370,7 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
                 <div className="mt-4 space-y-2">
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                     <Search className="w-4 h-4" />
-                    {t.sources}
+                    {t('sources', 'Sources')}
                   </h4>
                   {citations.map((citation) => (
                     <SourceCitation key={citation.id} citation={citation} language={language} />
@@ -387,8 +389,8 @@ export default function ChatWidget({ config, onConfigChange, embedded = false }:
                 onSend={() => handleSendMessage(inputValue)}
                 onVoiceInput={handleVoiceInput}
                 isRecording={isRecording}
-                placeholder={t.placeholder}
-                enableVoice={config.enableVoice}
+                placeholder={config.placeholder || t('placeholder', 'Type your message...')}
+                enableVoice={config.voiceEnabled}
                 language={language}
               />
             </div>

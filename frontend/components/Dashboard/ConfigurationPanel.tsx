@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Palette, Mic, MessageSquare, Database, Settings2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getCorpora } from '@/lib/rag-api'
-import { useToast } from '@/hooks/use-toast'
 
 interface ConfigurationPanelProps {
   config: WidgetConfig
@@ -22,7 +21,6 @@ interface ConfigurationPanelProps {
 export default function ConfigurationPanel({ config, onConfigUpdate }: ConfigurationPanelProps) {
   const [corpora, setCorpora] = useState<Corpus[]>([])
   const [isLoadingCorpora, setIsLoadingCorpora] = useState(true)
-  const { toast } = useToast()
 
   // Load corpora on mount
   useEffect(() => {
@@ -32,15 +30,11 @@ export default function ConfigurationPanel({ config, onConfigUpdate }: Configura
   const loadCorpora = async () => {
     try {
       setIsLoadingCorpora(true)
-      const corporaData = await getCorpora(config?.id)
+      const corporaData = await getCorpora(undefined)
       setCorpora(corporaData)
     } catch (error) {
       console.error('Failed to load corpora:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to load RAG corpora',
-        variant: 'destructive'
-      })
+      // Could implement a notification system later
     } finally {
       setIsLoadingCorpora(false)
     }

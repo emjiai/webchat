@@ -9,14 +9,14 @@ export async function GET(request: NextRequest) {
     serverChatbotStore.debugListChatbots()
     
     // Get all chatbots
-    const allChatbots = serverChatbotStore.getAllChatbots()
+    const allChatbots = await serverChatbotStore.getAllChatbots()
     
     console.log('Debug: Found', allChatbots.length, 'chatbots')
     
     // Create a test chatbot if none exist
     if (allChatbots.length === 0) {
       console.log('Debug: No chatbots found, creating test chatbot')
-      const testChatbot = serverChatbotStore.createChatbot(
+      const testChatbot = await serverChatbotStore.createChatbot(
         'Test WorkerBull Bot',
         'Test chatbot for debugging',
         'http://localhost:3000'

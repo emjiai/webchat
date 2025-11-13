@@ -103,6 +103,9 @@ export interface WidgetConfig {
 
     // Integration and Security
     allowedDomains?: string[]
+    
+    // Internationalization
+    language?: 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'ko' | 'zh'
   }
   
   export interface Message {
@@ -115,6 +118,8 @@ export interface WidgetConfig {
     audioUrl?: string
     model?: string
     engine?: string
+    isStreaming?: boolean
+    inputMode?: 'voice' | 'text'
   }
   
   export interface Citation {
@@ -123,6 +128,14 @@ export interface WidgetConfig {
     title: string
     snippet: string
     relevanceScore: number
+    metadata?: {
+      author?: string
+      publishDate?: string
+      url?: string
+      lastUpdated?: string
+      version?: string
+      documentId?: string
+    }
   }
   
   export interface RAGDocument {

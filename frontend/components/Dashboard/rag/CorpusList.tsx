@@ -32,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { useToast } from '@/hooks/use-toast'
+// Toast functionality removed
 
 import { Corpus, CorpusCardProps } from '@/types/rag'
 import { deleteCorpus, formatFileSize } from '@/lib/rag-api'
@@ -58,28 +58,21 @@ interface CorpusCardActionsProps {
 function CorpusCardActions({ corpus, onEdit, onDelete, onView, onCopyId }: CorpusCardActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const { toast } = useToast()
+  // Toast functionality removed
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true)
       await deleteCorpus(corpus.id)
       
-      toast({
-        title: 'Success',
-        description: `Corpus "${corpus.display_name}" deleted successfully`,
-      })
+      console.log('Success: Corpus deleted successfully:', corpus.display_name)
       
       onDelete(corpus.id)
       setShowDeleteDialog(false)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete corpus'
       
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      })
+      console.error('Error deleting corpus:', errorMessage)
     } finally {
       setIsDeleting(false)
     }
@@ -88,17 +81,10 @@ function CorpusCardActions({ corpus, onEdit, onDelete, onView, onCopyId }: Corpu
   const handleCopyId = async () => {
     try {
       await navigator.clipboard.writeText(corpus.id)
-      toast({
-        title: 'Copied',
-        description: 'Corpus ID copied to clipboard',
-      })
+      console.log('Corpus ID copied to clipboard:', corpus.id)
       onCopyId(corpus.id)
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to copy corpus ID',
-        variant: 'destructive',
-      })
+      console.error('Failed to copy corpus ID')
     }
   }
 
@@ -107,7 +93,7 @@ function CorpusCardActions({ corpus, onEdit, onDelete, onView, onCopyId }: Corpu
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             className="h-8 w-8 p-0 hover:bg-gray-100"
             onClick={(e) => e.stopPropagation()}
@@ -198,10 +184,10 @@ function CorpusCard({ corpus, isSelected, onSelect, onEdit, onDelete, onView, on
 
   return (
     <Card 
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+      className={`cursor-pointer transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] touch-manipulation ${
         isSelected 
-          ? 'ring-2 ring-blue-500 bg-blue-50 shadow-md' 
-          : 'hover:bg-gray-50'
+          ? 'ring-2 ring-blue-500 bg-blue-50 shadow-lg scale-[1.01]' 
+          : 'hover:bg-gray-50 active:scale-[0.99]'
       }`}
       onClick={() => onSelect(corpus)}
     >
@@ -350,17 +336,22 @@ export default function CorpusList({
 
   return (
     <div className="space-y-3">
-      {corpora.map(corpus => (
-        <CorpusCard
-          key={corpus.id}
-          corpus={corpus}
-          isSelected={selectedCorpusId === corpus.id}
-          onSelect={onSelectCorpus}
-          onEdit={onEditCorpus}
-          onDelete={handleDeleteCorpus}
-          onView={handleViewCorpus}
-          onCopyId={handleCopyId}
-        />
+      {corpora.map((corpus, index) => (
+        <div 
+          key={corpus.id} 
+          className="animate-in fade-in slide-in-from-left-4 duration-500"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
+          <CorpusCard
+            corpus={corpus}
+            isSelected={selectedCorpusId === corpus.id}
+            onSelect={onSelectCorpus}
+            onEdit={onEditCorpus}
+            onDelete={handleDeleteCorpus}
+            onView={handleViewCorpus}
+            onCopyId={handleCopyId}
+          />
+        </div>
       ))}
     </div>
   )

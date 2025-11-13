@@ -48,7 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+// Toast functionality removed
 
 import { Document, DocumentLibraryProps } from '@/types/rag'
 import { deleteDocument, formatFileSize, getFileTypeDisplay } from '@/lib/rag-api'
@@ -63,28 +63,21 @@ interface DocumentActionsProps {
 function DocumentActions({ document, onView, onDelete, onDownload }: DocumentActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const { toast } = useToast()
+  // Toast functionality removed
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true)
       await deleteDocument(document.id)
       
-      toast({
-        title: 'Success',
-        description: `Document "${document.display_name}" deleted successfully`,
-      })
+      console.log('Success: Document deleted successfully:', document.display_name)
       
       onDelete(document.id)
       setShowDeleteDialog(false)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete document'
       
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      })
+      console.error('Error deleting document:', errorMessage)
     } finally {
       setIsDeleting(false)
     }
@@ -92,10 +85,7 @@ function DocumentActions({ document, onView, onDelete, onDownload }: DocumentAct
 
   const handleDownload = () => {
     // For now, show a toast that download functionality will be implemented
-    toast({
-      title: 'Coming Soon',
-      description: 'Document download functionality will be available in a future update',
-    })
+    console.log('Coming Soon: Document download functionality will be available in a future update')
   }
 
   return (
@@ -103,7 +93,7 @@ function DocumentActions({ document, onView, onDelete, onDownload }: DocumentAct
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             className="h-8 w-8 p-0 hover:bg-gray-100"
             onClick={(e) => e.stopPropagation()}
@@ -221,34 +211,38 @@ function DocumentCard({
 
   if (viewMode === 'list') {
     return (
-      <Card className="hover:shadow-sm transition-shadow cursor-pointer" onClick={() => onView(document)}>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="text-2xl">{getFileIcon(document.file_type || '')}</div>
+      <Card className="hover:shadow-sm transition-all duration-200 cursor-pointer touch-manipulation active:scale-[0.98]" onClick={() => onView(document)}>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className="text-xl sm:text-2xl flex-shrink-0">{getFileIcon(document.file_type || '')}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="font-medium truncate">{document.display_name}</p>
-                  {getStatusIcon(document.upload_status)}
-                  <Badge className={getStatusColor(document.upload_status)}>
-                    {document.upload_status}
-                  </Badge>
+                  <p className="font-medium truncate text-sm sm:text-base">{document.display_name}</p>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {getStatusIcon(document.upload_status)}
+                    <Badge className={`${getStatusColor(document.upload_status)} text-xs hidden sm:inline-flex`}>
+                      {document.upload_status}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span>{getFileTypeDisplay(document.file_type || '')}</span>
-                  <span>•</span>
-                  <span>{formatFileSize(document.file_size_bytes)}</span>
-                  <span>•</span>
-                  <span>{new Date(document.created_at).toLocaleDateString()}</span>
+                <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
+                  <span className="truncate">{getFileTypeDisplay(document.file_type || '')}</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span className="flex-shrink-0">{formatFileSize(document.file_size_bytes)}</span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="hidden md:inline flex-shrink-0">{new Date(document.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
-            <DocumentActions
-              document={document}
-              onView={onView}
-              onDelete={onDelete}
-              onDownload={onDownload}
-            />
+            <div className="flex-shrink-0">
+              <DocumentActions
+                document={document}
+                onView={onView}
+                onDelete={onDelete}
+                onDownload={onDownload}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -256,51 +250,53 @@ function DocumentCard({
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onView(document)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="text-3xl">{getFileIcon(document.file_type || '')}</div>
+    <Card className="hover:shadow-md transition-all duration-200 cursor-pointer touch-manipulation active:scale-[0.98]" onClick={() => onView(document)}>
+      <CardHeader className="pb-2 sm:pb-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+            <div className="text-2xl sm:text-3xl flex-shrink-0">{getFileIcon(document.file_type || '')}</div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-base truncate">
+              <CardTitle className="text-sm sm:text-base truncate leading-tight">
                 {document.display_name}
               </CardTitle>
-              <CardDescription className="line-clamp-2">
+              <CardDescription className="line-clamp-2 text-xs sm:text-sm mt-1">
                 {document.original_filename}
               </CardDescription>
             </div>
           </div>
-          <DocumentActions
-            document={document}
-            onView={onView}
-            onDelete={onDelete}
-            onDownload={onDownload}
-          />
+          <div className="flex-shrink-0">
+            <DocumentActions
+              document={document}
+              onView={onView}
+              onDelete={onDelete}
+              onDownload={onDownload}
+            />
+          </div>
         </div>
       </CardHeader>
       
       <CardContent className="pt-0">
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {/* Status */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               {getStatusIcon(document.upload_status)}
-              <Badge className={getStatusColor(document.upload_status)}>
+              <Badge className={`${getStatusColor(document.upload_status)} text-xs`}>
                 {document.upload_status}
               </Badge>
             </div>
           </div>
 
           {/* File info */}
-          <div className="grid grid-cols-1 gap-2 text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
-              <HardDrive className="w-4 h-4 text-gray-400" />
-              <span>{formatFileSize(document.file_size_bytes)}</span>
-              <span>•</span>
-              <span>{getFileTypeDisplay(document.file_type || '')}</span>
+          <div className="space-y-1 sm:space-y-2">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+              <HardDrive className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+              <span className="truncate">{formatFileSize(document.file_size_bytes)}</span>
+              <span className="hidden sm:inline">•</span>
+              <span className="hidden sm:inline truncate">{getFileTypeDisplay(document.file_type || '')}</span>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
               <span>{new Date(document.created_at).toLocaleDateString()}</span>
             </div>
           </div>
@@ -402,63 +398,67 @@ export default function DocumentLibrary({
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+      <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-row sm:gap-4 sm:justify-between">
         {/* Search */}
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             placeholder="Search documents..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-10 touch-manipulation"
           />
         </div>
 
-        <div className="flex gap-2">
-          {/* Status Filter */}
-          <Select value={filterStatus} onValueChange={onFilterStatusChange}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
-              <SelectItem value="failed">Failed</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+          <div className="flex gap-2">
+            {/* Status Filter */}
+            <Select value={filterStatus} onValueChange={onFilterStatusChange}>
+              <SelectTrigger className="flex-1 sm:w-32 h-10">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+              </SelectContent>
+            </Select>
 
-          {/* Sort */}
-          <Select value={sortBy} onValueChange={onSortByChange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="created_at">Date</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="size">Size</SelectItem>
-              <SelectItem value="type">Type</SelectItem>
-            </SelectContent>
-          </Select>
+            {/* Sort */}
+            <Select value={sortBy} onValueChange={onSortByChange}>
+              <SelectTrigger className="flex-1 sm:w-32 h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_at">Date</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="size">Size</SelectItem>
+                <SelectItem value="type">Type</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* View Mode */}
-          <div className="flex border rounded-lg">
+          <div className="flex border rounded-lg h-10 self-end sm:self-auto">
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
               onClick={() => onViewModeChange('grid')}
-              className="rounded-r-none"
+              className="rounded-r-none h-full px-3 touch-manipulation"
             >
               <Grid className="w-4 h-4" />
+              <span className="ml-1 sm:hidden">Grid</span>
             </Button>
             <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
               onClick={() => onViewModeChange('list')}
-              className="rounded-l-none"
+              className="rounded-l-none h-full px-3 touch-manipulation"
             >
               <List className="w-4 h-4" />
+              <span className="ml-1 sm:hidden">List</span>
             </Button>
           </div>
         </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { useDropzone } from 'react-dropzone'
 import { 
   Upload, 
   FileText, 
@@ -29,7 +28,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
+// Toast functionality removed
 
 import { DocumentUploadProps, ChunkingStrategy } from '@/types/rag'
 import { 
@@ -69,10 +68,13 @@ export default function DocumentUploader({
   const [chunkingStrategy, setChunkingStrategy] = useState<ChunkingStrategy>('auto')
   const abortControllerRef = useRef<AbortController | null>(null)
   
-  const { toast } = useToast()
+  // Toast functionality removed
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles: UploadFile[] = acceptedFiles.map((file, index) => ({
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isDragActive, setIsDragActive] = useState(false)
+
+  const handleFileChange = (selectedFiles: File[]) => {
+    const newFiles: UploadFile[] = selectedFiles.map((file, index) => ({
       ...file,
       id: `${Date.now()}-${index}`,
       status: 'pending' as const,
@@ -91,22 +93,33 @@ export default function DocumentUploader({
     })
 
     setFiles(prev => [...prev, ...validatedFiles])
-  }, [])
+  }
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'text/plain': ['.txt'],
-      'text/markdown': ['.md'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'application/msword': ['.doc'],
-      'text/csv': ['.csv'],
-      'application/json': ['.json']
-    },
-    maxSize: 50 * 1024 * 1024, // 50MB
-    multiple: true
-  })
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    handleFileChange(selectedFiles)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragActive(false)
+    const droppedFiles = Array.from(e.dataTransfer.files)
+    handleFileChange(droppedFiles)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragActive(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragActive(false)
+  }
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click()
+  }
 
   const removeFile = (fileId: string) => {
     setFiles(prev => prev.filter(f => f.id !== fileId))
@@ -125,11 +138,7 @@ export default function DocumentUploader({
 
     const validFiles = files.filter(f => f.status !== 'error')
     if (validFiles.length === 0) {
-      toast({
-        title: 'No valid files',
-        description: 'Please add valid files before uploading',
-        variant: 'destructive'
-      })
+      console.error('No valid files to upload')
       return
     }
 
@@ -143,11 +152,7 @@ export default function DocumentUploader({
       setIsValidating(false)
 
       if (!validation.valid_files || validation.valid_files.length === 0) {
-        toast({
-          title: 'Validation failed',
-          description: 'No files passed backend validation',
-          variant: 'destructive'
-        })
+        console.error('Validation failed: No files passed backend validation')
         return
       }
 
@@ -165,11 +170,7 @@ export default function DocumentUploader({
       )
 
       if (finalValidFiles.length === 0) {
-        toast({
-          title: 'No valid files',
-          description: 'All files failed validation',
-          variant: 'destructive'
-        })
+        console.error('All files failed validation')
         return
       }
 
@@ -216,29 +217,18 @@ export default function DocumentUploader({
       }
 
       if (uploadedDocuments.length > 0) {
-        toast({
-          title: 'Upload completed',
-          description: `${uploadedDocuments.length} document${uploadedDocuments.length === 1 ? '' : 's'} uploaded successfully`
-        })
+        console.log(`Upload completed: ${uploadedDocuments.length} document${uploadedDocuments.length === 1 ? '' : 's'} uploaded successfully`)
         onUploadComplete(uploadedDocuments)
       }
 
       const errorCount = finalValidFiles.length - uploadedDocuments.length
       if (errorCount > 0) {
-        toast({
-          title: 'Partial upload failure',
-          description: `${errorCount} document${errorCount === 1 ? '' : 's'} failed to upload`,
-          variant: 'destructive'
-        })
+        console.error(`Partial upload failure: ${errorCount} document${errorCount === 1 ? '' : 's'} failed to upload`)
       }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed'
-      toast({
-        title: 'Upload failed',
-        description: errorMessage,
-        variant: 'destructive'
-      })
+      console.error('Upload failed:', errorMessage)
     } finally {
       setIsUploading(false)
       setIsValidating(false)
@@ -309,23 +299,47 @@ export default function DocumentUploader({
 
           {/* Drop Zone */}
           <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={openFileDialog}
+            className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all duration-200 cursor-pointer touch-manipulation active:scale-[0.99] focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 ${
               isDragActive 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-blue-500 bg-blue-50 scale-[1.02]' 
+                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
             } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
+            role="button"
+            tabIndex={isUploading ? -1 : 0}
+            aria-label="Upload documents by dropping files or clicking to browse"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                openFileDialog()
+              }
+            }}
           >
-            <input {...getInputProps()} />
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.txt,.md,.docx,.doc,.csv,.json"
+              onChange={handleInputChange}
+              style={{ display: 'none' }}
+              aria-label="Select files to upload"
+            />
+            <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
             {isDragActive ? (
-              <p className="text-blue-600 font-medium">Drop files here...</p>
+              <p className="text-blue-600 font-medium text-sm sm:text-base">Drop files here...</p>
             ) : (
               <>
-                <p className="text-gray-600 mb-2">
-                  Drag and drop files here, or <span className="text-blue-600 font-medium">browse</span>
+                <p className="text-gray-600 mb-2 text-sm sm:text-base">
+                  <span className="hidden sm:inline">Drag and drop files here, or </span>
+                  <span className="text-blue-600 font-medium">
+                    <span className="sm:hidden">Tap to select files</span>
+                    <span className="hidden sm:inline">browse</span>
+                  </span>
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500">
                   Max 50MB per file • PDF, TXT, DOCX, MD, CSV, JSON
                 </p>
               </>
@@ -350,51 +364,54 @@ export default function DocumentUploader({
                 )}
               </div>
 
-              <div className="space-y-2 max-h-60 overflow-y-auto">
+              <div className="space-y-2 max-h-60 sm:max-h-80 overflow-y-auto touch-pan-y">
                 {files.map((file) => (
-                  <Card key={file.id} className={`${file.status === 'error' ? 'border-red-200' : ''}`}>
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-3">
-                        <div className="text-2xl">{getFileIcon(file)}</div>
+                  <Card key={file.id} className={`transition-all duration-200 ${file.status === 'error' ? 'border-red-200 bg-red-50' : 'hover:shadow-sm'}`}>
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <div className="text-xl sm:text-2xl flex-shrink-0">{getFileIcon(file)}</div>
                         
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            {file.status !== 'error' && !isUploading ? (
-                              <Input
-                                value={file.displayName || ''}
-                                onChange={(e) => updateFileName(file.id, e.target.value)}
-                                className="text-sm h-7 font-medium"
-                                placeholder={file.name}
-                              />
-                            ) : (
-                              <p className="font-medium text-sm truncate">{file.displayName}</p>
+                          {/* Mobile layout - stack vertically */}
+                          <div className="space-y-2 sm:space-y-1">
+                            <div className="flex items-center gap-2">
+                              {file.status !== 'error' && !isUploading ? (
+                                <Input
+                                  value={file.displayName || ''}
+                                  onChange={(e) => updateFileName(file.id, e.target.value)}
+                                  className="text-sm h-8 sm:h-7 font-medium flex-1"
+                                  placeholder={file.name}
+                                />
+                              ) : (
+                                <p className="font-medium text-sm truncate flex-1">{file.displayName}</p>
+                              )}
+                              <Badge className={`${getStatusColor(file.status)} text-xs`}>
+                                {file.status}
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span>{getFileTypeDisplay(file.type)}</span>
+                              <span className="hidden sm:inline">•</span>
+                              <span>{formatFileSize(file.size)}</span>
+                            </div>
+
+                            {file.status === 'uploading' && (
+                              <Progress value={file.progress} className="mt-2 h-2" />
                             )}
-                            <Badge className={getStatusColor(file.status)}>
-                              {file.status}
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span>{getFileTypeDisplay(file.type)}</span>
-                            <span>•</span>
-                            <span>{formatFileSize(file.size)}</span>
-                          </div>
 
-                          {file.status === 'uploading' && (
-                            <Progress value={file.progress} className="mt-2 h-1" />
-                          )}
-
-                          {file.status === 'error' && file.error && (
-                            <p className="text-xs text-red-600 mt-1">{file.error}</p>
-                          )}
+                            {file.status === 'error' && file.error && (
+                              <p className="text-xs text-red-600 mt-1 break-words">{file.error}</p>
+                            )}
+                          </div>
                         </div>
 
                         {!isUploading && (
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => removeFile(file.id)}
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-600"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 flex-shrink-0 touch-manipulation"
                           >
                             <X className="w-4 h-4" />
                           </Button>

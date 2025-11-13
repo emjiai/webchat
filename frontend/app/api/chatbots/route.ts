@@ -61,6 +61,9 @@ export async function POST(request: NextRequest) {
       name,
       description: description || '',
       targetWebsite: targetWebsite || '',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       config: {
         theme: {
           primaryColor: '#3b82f6',

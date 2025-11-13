@@ -85,7 +85,7 @@ export default function TextInput({
                 ? 'bg-red-500 text-white animate-pulse-ring'
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
             }`}
-            aria-label={isRecording ? t.stopRecording : t.startRecording}
+            aria-label={isRecording ? t('stopRecording', 'Stop Recording') : t('startRecording', 'Start Recording')}
           >
             <AnimatePresence mode="wait">
               {isRecording ? (
@@ -122,7 +122,7 @@ export default function TextInput({
               ? 'bg-blue-500 text-white hover:bg-blue-600'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
           }`}
-          aria-label={t.sendMessage}
+          aria-label={t('sendMessage', 'Send Message')}
         >
           <Send className="w-5 h-5" />
         </motion.button>
@@ -138,7 +138,7 @@ export default function TextInput({
               <span></span>
               <span></span>
             </span>
-            <span>{t.listening}</span>
+            <span>{t('listening', 'Listening...')}</span>
           </div>
         </div>
       )}

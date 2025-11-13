@@ -14,11 +14,12 @@ import { processVoiceInput, synthesizeSpeech } from '@/lib/voice-service'
 
 interface ChatWidgetProps {
   config: WidgetConfig
+  chatbotId?: string
   isPreview?: boolean
   onToggle?: (open: boolean) => void
 }
 
-export default function ChatWidget({ config, isPreview = false, onToggle }: ChatWidgetProps) {
+export default function ChatWidget({ config, chatbotId, isPreview = false, onToggle }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>(() => [
     {
@@ -97,7 +98,7 @@ export default function ChatWidget({ config, isPreview = false, onToggle }: Chat
         content,
         currentConfig?.defaultTextModel || 'gpt',
         currentConfig?.ragEnabled || true,
-        currentConfig?.id || 'default', // Pass chatbot ID
+        chatbotId || 'default', // Pass chatbot ID
         currentConfig?.ragCorpusId // Pass corpus ID for RAG
       )
 

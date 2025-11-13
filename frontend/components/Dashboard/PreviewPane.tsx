@@ -118,7 +118,7 @@ export default function PreviewPane({ config }: PreviewPaneProps) {
 
             {/* Chat Widget Overlay */}
             <div className={`absolute ${
-              config.mode === 'popup' 
+              config.displayMode === 'popup' 
                 ? config.position === 'bottom-right' ? 'bottom-4 right-4' :
                   config.position === 'bottom-left' ? 'bottom-4 left-4' :
                   config.position === 'top-right' ? 'top-4 right-4' :
@@ -140,7 +140,7 @@ export default function PreviewPane({ config }: PreviewPaneProps) {
             <div>
               <span className="text-gray-500 dark:text-gray-400">Mode:</span>
               <span className="ml-2 font-medium text-gray-900 dark:text-white">
-                {config.mode.charAt(0).toUpperCase() + config.mode.slice(1)}
+                {config.displayMode.charAt(0).toUpperCase() + config.displayMode.slice(1)}
               </span>
             </div>
             <div>
@@ -152,7 +152,7 @@ export default function PreviewPane({ config }: PreviewPaneProps) {
             <div>
               <span className="text-gray-500 dark:text-gray-400">Theme:</span>
               <span className="ml-2 font-medium text-gray-900 dark:text-white">
-                {config.theme.charAt(0).toUpperCase() + config.theme.slice(1)}
+                {config.theme.primaryColor}
               </span>
             </div>
             <div>

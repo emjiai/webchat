@@ -14,11 +14,13 @@ interface LanguageSelectorProps {
 
 const languages: { code: Language; name: string; nativeName: string; flag: string }[] = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
   { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-  { code: 'ig', name: 'Igbo', nativeName: 'Igbo', flag: '🇳🇬' },
   { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-  { code: 'yo', name: 'Yoruba', nativeName: 'Yorùbá', flag: '🇳🇬' },
-  { code: 'ha', name: 'Hausa', nativeName: 'Hausa', flag: '🇳🇬' }
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' }
 ];
 
 export default function LanguageSelector({ currentLanguage, onLanguageChange, compact = false }: LanguageSelectorProps) {
@@ -32,7 +34,7 @@ export default function LanguageSelector({ currentLanguage, onLanguageChange, co
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          aria-label={t.changeLanguage}
+          aria-label={t('changeLanguage', 'Change Language')}
         >
           <span className="text-lg">{currentLang.flag}</span>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -87,7 +89,7 @@ export default function LanguageSelector({ currentLanguage, onLanguageChange, co
       <div className="flex items-center gap-3 mb-4">
         <Globe className="w-5 h-5 text-blue-500" />
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {t.selectLanguage}
+          {t('selectLanguage', 'Select Language')}
         </h3>
       </div>
 

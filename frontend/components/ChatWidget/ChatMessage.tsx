@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Bot, User, Volume2, Mic, Type } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 import { Message, WidgetConfig, Language } from '@/types';
 import { getTranslation } from '@/lib/i18n/translations';
 
@@ -34,7 +33,7 @@ export default function ChatMessage({ message, config, language, onPlayAudio }: 
             <User className="w-5 h-5" />
           ) : (
             <img
-              src={config.avatarUrl || '/assets/avatars/default-bot.png'}
+              src={config.botAvatar || '/assets/avatars/default-bot.png'}
               alt={config.botName}
               className="w-full h-full rounded-full object-cover"
               onError={(e) => {
@@ -67,7 +66,16 @@ export default function ChatMessage({ message, config, language, onPlayAudio }: 
             </div>
           ) : (
             <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+              <div 
+                className="whitespace-pre-wrap break-words"
+                dangerouslySetInnerHTML={{ 
+                  __html: message.content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    .replace(/\n/g, '<br>')
+                }}
+              />
             </div>
           )}
         </div>
@@ -83,31 +91,31 @@ export default function ChatMessage({ message, config, language, onPlayAudio }: 
               {message.inputMode === 'voice' ? (
                 <>
                   <Mic className="w-3 h-3" />
-                  {t.voice}
+                  {t('voice', 'Voice')}
                 </>
               ) : (
                 <>
                   <Type className="w-3 h-3" />
-                  {t.text}
+                  {t('text', 'Text')}
                 </>
               )}
             </span>
           )}
           
-          {!isUser && config.enableVoice && onPlayAudio && (
+          {!isUser && config.voiceEnabled && onPlayAudio && (
             <button
               onClick={onPlayAudio}
               className="flex items-center gap-1 hover:text-blue-500 transition-colors"
-              aria-label={t.play}
+              aria-label={t('play', 'Play')}
             >
               <Volume2 className="w-3 h-3" />
-              {t.play}
+              {t('play', 'Play')}
             </button>
           )}
           
           {message.citations && message.citations.length > 0 && (
             <span className="text-blue-500">
-              {message.citations.length} {t.source}{message.citations.length > 1 ? 's' : ''}
+              {message.citations.length} {t('source', 'source')}{message.citations.length > 1 ? 's' : ''}
             </span>
           )}
         </div>
