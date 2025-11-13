@@ -279,13 +279,15 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
       </AnimatePresence>
 
       {/* Messages */}
-      <div className="flex-1 overflow-hidden">
-        <MessageList
-          messages={messages}
-          isLoading={isLoading}
-          config={currentConfig}
-          onPlayVoice={handlePlayVoice}
-        />
+      <div className="flex-1 overflow-hidden relative">
+        <div className="h-full">
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            config={currentConfig}
+            onPlayVoice={handlePlayVoice}
+          />
+        </div>
         <div ref={messagesEndRef} />
       </div>
 
