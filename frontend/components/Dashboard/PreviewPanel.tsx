@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { WidgetConfig } from '@/types/widget'
 import ChatWidget from '@/components/widget/ChatWidget'
-import { Monitor, Tablet, Smartphone } from 'lucide-react'
+import { Monitor, Tablet, Smartphone, Bot } from 'lucide-react'
 
 interface PreviewPanelProps {
   config: WidgetConfig
@@ -12,6 +12,14 @@ interface PreviewPanelProps {
 export default function PreviewPanel({ config }: PreviewPanelProps) {
   const [deviceView, setDeviceView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const [isWidgetOpen, setIsWidgetOpen] = useState(false)
+
+  // Create preview-specific config that forces Gemini model
+  const previewConfig = useMemo((): WidgetConfig => ({
+    ...config,
+    defaultTextModel: 'gemini', // Force Gemini for preview
+    streamingEnabled: true,
+    ragEnabled: config.ragEnabled ?? true, // Enable RAG by default for preview
+  }), [config])
 
   const getDeviceStyles = () => {
     switch (deviceView) {
@@ -27,7 +35,13 @@ export default function PreviewPanel({ config }: PreviewPanelProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold">Widget Preview</h3>
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold">Widget Preview</h3>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm">
+            <Bot className="w-4 h-4" />
+            <span className="font-medium">Gemini Mode</span>
+          </div>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => setDeviceView('desktop')}
@@ -102,7 +116,7 @@ export default function PreviewPanel({ config }: PreviewPanelProps) {
 
           {/* Chat Widget */}
           <ChatWidget 
-            config={config}
+            config={previewConfig}
             isPreview={true}
             onToggle={(open) => setIsWidgetOpen(open)}
           />
@@ -110,12 +124,18 @@ export default function PreviewPanel({ config }: PreviewPanelProps) {
       </div>
 
       {/* Preview Info */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h4 className="font-semibold text-blue-900 mb-2">Preview Mode</h4>
-        <p className="text-sm text-blue-700">
-          This is a live preview of your chat widget. Click the chat bubble to open it and test the features.
-          The widget will behave exactly like this when embedded on your website.
+      <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+        <h4 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+          <Bot className="w-5 h-5" />
+          Preview Mode - Powered by Gemini
+        </h4>
+        <p className="text-sm text-green-700 mb-2">
+          This preview uses Google's Gemini model for all chat interactions to demonstrate the most advanced AI capabilities.
+          Click the chat bubble to test conversations {previewConfig.ragEnabled ? 'with or without your uploaded documents' : ''}.
         </p>
+        <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded inline-block">
+          💡 The actual widget will use your configured model ({config.defaultTextModel || 'gpt'}) when deployed
+        </div>
       </div>
     </div>
   )

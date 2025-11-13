@@ -133,7 +133,7 @@ export class DummyDataService {
     const newChatbot: Chatbot = {
       ...chatbotData,
       id,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       isActive: true
     }
 

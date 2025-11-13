@@ -1,4 +1,4 @@
-import { KeyboardEvent } from 'react'
+import { KeyboardEvent, useRef, useCallback, useEffect } from 'react'
 import { Send, Mic, MicOff, Paperclip } from 'lucide-react'
 import { VoiceState, WidgetConfig } from '@/types/widget'
 
@@ -23,12 +23,46 @@ export default function MessageInput({
   voiceState,
   config
 }: MessageInputProps) {
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+  const inputRef = useRef<HTMLInputElement>(null)
+  
+  console.log('🔄 MessageInput render:', { 
+    value, 
+    isLoading, 
+    voiceRecording: voiceState.isRecording,
+    disabled: isLoading || voiceState.isRecording
+  })
+
+  // Focus input when it becomes enabled
+  useEffect(() => {
+    const shouldFocus = !isLoading && !voiceState.isRecording
+    console.log('🎯 Focus effect triggered:', { shouldFocus, isLoading, voiceRecording: voiceState.isRecording })
+    
+    if (shouldFocus && inputRef.current && document.activeElement !== inputRef.current) {
+      console.log('🔍 Focusing input field')
+      inputRef.current.focus()
+    }
+  }, [isLoading, voiceState.isRecording])
+
+  const handleKeyPress = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       onSend()
     }
-  }
+  }, [onSend])
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('⌨️ MessageInput.handleInputChange:', {
+      value: e.target.value,
+      focused: document.activeElement === inputRef.current,
+      inputRef: !!inputRef.current
+    })
+    onChange(e.target.value)
+  }, [onChange])
+
+  const handleSendClick = useCallback(() => {
+    onSend()
+  }, [onSend])
+
 
   return (
     <div className="border-t p-4">
@@ -43,12 +77,18 @@ export default function MessageInput({
         )}
 
         <input
+          ref={inputRef}
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPress}
-          placeholder="Type your message..."
+          onFocus={() => console.log('🎯 Input focused')}
+          onBlur={() => console.log('❌ Input blurred')}
+          placeholder={config?.placeholder || "Type your message..."}
           disabled={isLoading || voiceState.isRecording}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
           className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ color: config?.theme?.textColor || '#1f2937' }}
         />
@@ -72,7 +112,7 @@ export default function MessageInput({
         )}
 
         <button
-          onClick={onSend}
+          onClick={handleSendClick}
           disabled={!value.trim() || isLoading}
           className="p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           style={{

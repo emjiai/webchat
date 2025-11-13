@@ -26,12 +26,27 @@ export async function processMessage(
   model: string,
   ragEnabled: boolean,
   chatbotId: string = 'default',
-  corpusId?: string
+  corpusId?: string,
+  isPreview: boolean = false
 ): Promise<ChatResponse> {
-  // Try to use the new RAG API if available and RAG is enabled
+  // Force Gemini model when in preview mode
+  const effectiveModel = isPreview ? 'gemini' : model
+  
+  console.log(`🔍 Processing message in ${isPreview ? 'PREVIEW' : 'NORMAL'} mode with model: ${effectiveModel}`)
+  
+  // For preview mode, try direct API calls first (skip RAG API for testing)
+  if (isPreview) {
+    console.log('🚀 Preview mode: Attempting direct API calls')
+    const directResponse = await processMessageLocal(message, effectiveModel, ragEnabled)
+    console.log('✅ Preview mode response:', directResponse.content.substring(0, 100) + '...')
+    return directResponse
+  }
+  
+  // For non-preview mode, try RAG API first
   if (ragEnabled && process.env.NEXT_PUBLIC_RAG_API_URL) {
     try {
-      const response = await processMessageWithRAG(message, chatbotId, corpusId, ragEnabled)
+      console.log('🔗 Trying RAG API...')
+      const response = await processMessageWithRAG(message, chatbotId, corpusId, ragEnabled, effectiveModel)
       return {
         content: response.content,
         citations: response.citations,
@@ -40,13 +55,14 @@ export async function processMessage(
         processing_time_ms: response.processing_time_ms
       }
     } catch (error) {
-      console.warn('RAG API failed, falling back to local processing:', error)
+      console.warn('❌ RAG API failed, falling back to local processing:', error)
       // Fall through to local processing
     }
   }
 
   // Fallback to original local processing
-  return processMessageLocal(message, model, ragEnabled)
+  console.log('📋 Using local processing fallback')
+  return processMessageLocal(message, effectiveModel, ragEnabled)
 }
 
 // New RAG API integration function
@@ -54,7 +70,8 @@ export async function processMessageWithRAG(
   message: string,
   chatbotId: string,
   corpusId?: string,
-  ragEnabled: boolean = true
+  ragEnabled: boolean = true,
+  model: string = 'gemini-2.5-flash'
 ): Promise<RAGApiResponse> {
   const apiUrl = process.env.NEXT_PUBLIC_RAG_API_URL || 'http://localhost:8000/api/v1'
   
@@ -64,7 +81,7 @@ export async function processMessageWithRAG(
     rag_enabled: ragEnabled,
     max_results: 10,
     temperature: 0.7,
-    model: 'gemini-2.5-flash'
+    model: model.includes('gemini') ? model : 'gemini-2.5-flash'
   }
 
   // Include corpus ID if provided
@@ -123,9 +140,116 @@ async function generateModelResponse(
   model: string,
   context: string
 ): Promise<string> {
-  // In production, this would call the actual API
-  // For demo, we'll return contextual responses based on keywords
+  console.log(`🤖 generateModelResponse called with model: ${model}, message: "${message.substring(0, 50)}..."`)
+  
+  // For Gemini model, use Google AI Studio API if available
+  if (model === 'gemini' && process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+    console.log('🔑 Gemini API key found, attempting API call...')
+    try {
+      const response = await callGeminiAPI(message, context)
+      console.log('✅ Gemini API response received:', response.substring(0, 100) + '...')
+      return response
+    } catch (error) {
+      console.error('❌ Gemini API error:', error)
+      // Fall back to demo response if API fails
+    }
+  } else if (model === 'gemini') {
+    console.log('⚠️ Gemini model requested but no API key found')
+  }
 
+  // For other models, try to use their respective APIs
+  if (model === 'gpt' && process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
+    try {
+      const response = await callOpenAIAPI(message, context)
+      return response
+    } catch (error) {
+      console.error('OpenAI API error:', error)
+    }
+  }
+
+  // Fallback to enhanced demo responses with model indication
+  return generateDemoResponse(message, model, context)
+}
+
+// Real Gemini API call using Google AI Studio
+async function callGeminiAPI(message: string, context: string): Promise<string> {
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`
+  
+  const prompt = context 
+    ? `Context information:\n${context}\n\nUser question: ${message}\n\nPlease provide a helpful response based on the context and your knowledge.`
+    : message
+
+  const requestBody = {
+    contents: [{
+      parts: [{
+        text: prompt
+      }]
+    }],
+    generationConfig: {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024,
+    }
+  }
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(`Gemini API error: ${response.statusText} - ${errorData.error?.message || 'Unknown error'}`)
+  }
+
+  const data = await response.json()
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I encountered an issue generating a response.'
+}
+
+// OpenAI API call (if API key is available)
+async function callOpenAIAPI(message: string, context: string): Promise<string> {
+  const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+  const apiUrl = 'https://api.openai.com/v1/chat/completions'
+  
+  const systemMessage = context 
+    ? `You are a helpful AI assistant. Use this context information to help answer questions: ${context}`
+    : 'You are a helpful AI assistant.'
+
+  const requestBody = {
+    model: 'gpt-3.5-turbo',
+    messages: [
+      { role: 'system', content: systemMessage },
+      { role: 'user', content: message }
+    ],
+    temperature: 0.7,
+    max_tokens: 1024,
+  }
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(requestBody),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(`OpenAI API error: ${response.statusText} - ${errorData.error?.message || 'Unknown error'}`)
+  }
+
+  const data = await response.json()
+  return data.choices?.[0]?.message?.content || 'I apologize, but I encountered an issue generating a response.'
+}
+
+// Enhanced demo responses as fallback
+function generateDemoResponse(message: string, model: string, context: string): string {
   const lowerMessage = message.toLowerCase()
   
   // Check for specific queries that match our demo data
@@ -188,56 +312,32 @@ All plans include a 14-day free trial. No credit card required to start!
 ${context ? `\n${context}` : ''}`
   }
 
-  if (lowerMessage.includes('customize') || lowerMessage.includes('appearance')) {
-    return `You can fully customize the widget to match your brand:
-
-🎨 **Visual Customization:**
-- Primary and secondary colors
-- Background and text colors
-- Widget size (small, medium, large)
-- Position on page (corners)
-- Display mode (popup, inline, fullscreen)
-
-⚙️ **Behavioral Customization:**
-- Welcome message
-- Bot name and avatar
-- Default AI model
-- Voice settings
-- RAG configuration
-
-All customizations can be done through our intuitive dashboard, and changes are reflected in real-time.
-
-${context ? `\n${context}` : ''}`
+  if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+    const greetings = {
+      gemini: `Hello! I'm powered by Google's Gemini AI. I'm here to help you with any questions you have. ${context ? 'I also have access to your uploaded documents to provide more specific answers.' : 'How can I assist you today?'}`,
+      gpt: `Hi there! I'm using GPT technology to help answer your questions. ${context ? 'I can reference your uploaded documents for more accurate responses.' : 'What would you like to know?'}`,
+      claude: `Hello! I'm Claude, an AI assistant. I'm here to help you with thoughtful and detailed responses. ${context ? 'I can also use your document knowledge base for better context.' : 'How may I help you?'}`,
+      grok: `Hey! I'm Grok - ready to help with a mix of wit and wisdom. ${context ? 'I\'ve got access to your docs too, so fire away!' : 'What\'s on your mind?'}`,
+      deepseek: `Greetings! I'm DeepSeek, here to provide deep insights and analysis. ${context ? 'With your documents as reference, I can offer even more precise help.' : 'What can I analyze for you?'}`
+    }
+    return greetings[model as keyof typeof greetings] || greetings.gemini
   }
 
-  if (lowerMessage.includes('install') || lowerMessage.includes('embed') || lowerMessage.includes('integrate')) {
-    return `Installing the chat widget is simple:
-
-1. **Configure** your widget in the dashboard
-2. **Copy** the generated embed code
-3. **Paste** it into your website's HTML
-
-The widget supports multiple installation methods:
-- Simple script tag (easiest)
-- NPM package for React/Vue/Angular apps
-- WordPress plugin
-- Shopify app
-
-The widget loads asynchronously and won't affect your page load speed. It's also mobile-responsive and works on all modern browsers.
-
-${context ? `\n${context}` : ''}`
+  // Default response for general queries with context
+  if (context) {
+    return `Based on the information available and your uploaded documents, I can help you with that. ${context}\n\nIs there anything specific about this information you'd like me to explain or expand upon?`
   }
 
-  // Default response for general queries
+  // Default response without context
   const modelResponses: Record<string, string> = {
-    gpt: `[GPT-4] ${context || "I understand your question. Based on my training, here's what I can tell you about that..."}`,
-    gemini: `[Gemini] ${context || "Let me help you with that. From my analysis..."}`,
-    claude: `[Claude] ${context || "I'd be happy to help. Here's my perspective on your question..."}`,
-    grok: `[Grok] ${context || "Interesting question! Let me break this down for you..."}`,
-    deepseek: `[DeepSeek] ${context || "Based on my deep learning models, here's what I found..."}`
+    gpt: `I'm here to help! As a GPT-powered assistant, I can assist with a wide variety of topics including answering questions, creative tasks, analysis, and much more. What would you like to know or discuss?`,
+    gemini: `Hello! I'm powered by Google's Gemini AI. I can help you with questions, analysis, creative tasks, and provide detailed explanations on many topics. What can I assist you with today?`,
+    claude: `I'm Claude, and I'd be happy to help you! I can assist with analysis, writing, math, coding, creative projects, and thoughtful discussion on many topics. What would you like to work on together?`,
+    grok: `I'm Grok! I aim to be helpful while keeping things interesting. I can tackle questions, creative challenges, analysis, and more - often with a bit of personality. What's puzzling you today?`,
+    deepseek: `I'm DeepSeek, designed for deep thinking and analysis. I can help with complex problems, detailed explanations, research, and provide insights across many domains. What would you like to explore?`
   }
 
-  return modelResponses[model] || "I'm here to help! Could you please provide more details about what you're looking for?"
+  return modelResponses[model] || modelResponses.gemini
 }
 
 // Stream response simulation (for future implementation)

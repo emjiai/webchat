@@ -79,7 +79,7 @@ class ServerChatbotStore {
           description: 'Your first chatbot - configure and customize as needed',
           targetWebsite: '',
           isActive: true,
-          config: defaultConfig
+          config: defaultConfig as any
         }
       })
 
@@ -163,7 +163,7 @@ class ServerChatbotStore {
           ...(updates.description !== undefined && { description: updates.description }),
           ...(updates.targetWebsite !== undefined && { targetWebsite: updates.targetWebsite }),
           ...(updates.isActive !== undefined && { isActive: updates.isActive }),
-          ...(updates.config && { config: updates.config })
+          ...(updates.config && { config: updates.config as any })
         }
       })
 
@@ -188,7 +188,7 @@ class ServerChatbotStore {
         return undefined
       }
 
-      const currentConfig = existing.config as WidgetConfig
+      const currentConfig = existing.config as unknown as WidgetConfig
       const updatedConfig = { ...currentConfig, ...configUpdates }
 
       const updatedChatbot = await prisma.chatbot.update({
@@ -271,7 +271,7 @@ class ServerChatbotStore {
           targetWebsite: originalChatbot.targetWebsite,
           isActive: originalChatbot.isActive,
           config: {
-            ...(originalChatbot.config as WidgetConfig),
+            ...(originalChatbot.config as unknown as WidgetConfig),
             botName: newName
           }
         }

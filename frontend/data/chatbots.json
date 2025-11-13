@@ -28,7 +28,7 @@
         "showHeader": true,
         "showFooter": true,
         "enableDragDrop": true,
-        "voiceEnabled": true,
+        "voiceEnabled": false,
         "defaultVoiceEngine": "openai",
         "voiceSpeed": 1,
         "voiceStyle": "friendly",
@@ -913,6 +913,144 @@
       "id": "chatbot_1761325896985_oyxlfc",
       "createdAt": "2025-10-24T17:11:36.985Z",
       "isActive": true,
+      "analytics": {
+        "totalConversations": 0,
+        "totalMessages": 0,
+        "uniqueUsers": 0,
+        "avgResponseTime": 0,
+        "voiceMessages": 0,
+        "textMessages": 0,
+        "ragQueries": 0,
+        "satisfaction": 0,
+        "activeUsers": 0,
+        "peakHour": "12:00 PM",
+        "popularModel": "GPT-4",
+        "avgSessionDuration": 0,
+        "conversationTrends": [
+          {
+            "date": "Mon",
+            "count": 0
+          },
+          {
+            "date": "Tue",
+            "count": 0
+          },
+          {
+            "date": "Wed",
+            "count": 0
+          },
+          {
+            "date": "Thu",
+            "count": 0
+          },
+          {
+            "date": "Fri",
+            "count": 0
+          },
+          {
+            "date": "Sat",
+            "count": 0
+          },
+          {
+            "date": "Sun",
+            "count": 0
+          }
+        ],
+        "modelUsage": [
+          {
+            "model": "GPT-4",
+            "percentage": 0
+          },
+          {
+            "model": "Claude",
+            "percentage": 0
+          },
+          {
+            "model": "Gemini",
+            "percentage": 0
+          },
+          {
+            "model": "Grok",
+            "percentage": 0
+          },
+          {
+            "model": "DeepSeek",
+            "percentage": 0
+          }
+        ],
+        "responseTimeDistribution": [
+          {
+            "range": "0-1s",
+            "count": 0
+          },
+          {
+            "range": "1-2s",
+            "count": 0
+          },
+          {
+            "range": "2-3s",
+            "count": 0
+          },
+          {
+            "range": "3-5s",
+            "count": 0
+          },
+          {
+            "range": "5s+",
+            "count": 0
+          }
+        ]
+      },
+      "conversations": []
+    },
+    "chatbot_1763069950423_z7bmx7": {
+      "name": "Test",
+      "description": "",
+      "targetWebsite": "",
+      "isActive": true,
+      "createdAt": "2025-11-13T21:39:10.423Z",
+      "updatedAt": "2025-11-13T21:39:10.405Z",
+      "config": {
+        "theme": {
+          "primaryColor": "#3b82f6",
+          "secondaryColor": "#8b5cf6",
+          "backgroundColor": "#ffffff",
+          "textColor": "#1f2937",
+          "fontFamily": "Outfit"
+        },
+        "welcomeMessage": "Hi! I'm Test. How can I help you today?",
+        "botName": "Test",
+        "botAvatar": "/bot-avatar.png",
+        "placeholder": "Type your message...",
+        "borderRadius": 12,
+        "displayMode": "popup",
+        "position": "bottom-right",
+        "size": "medium",
+        "width": 380,
+        "height": 560,
+        "zIndex": 9999,
+        "showHeader": true,
+        "showFooter": true,
+        "enableDragDrop": true,
+        "voiceEnabled": true,
+        "defaultVoiceEngine": "openai",
+        "voiceSpeed": 1,
+        "voiceStyle": "friendly",
+        "autoPlayResponses": false,
+        "defaultTextModel": "gpt",
+        "temperature": 0.7,
+        "maxTokens": 1024,
+        "streamingEnabled": true,
+        "showTypingIndicator": true,
+        "ragEnabled": true,
+        "showCitations": true,
+        "maxRetrievedDocs": 3,
+        "minRelevanceScore": 0.5,
+        "collectUserInfo": false,
+        "enableAnalytics": true,
+        "allowFileUploads": false
+      },
+      "id": "chatbot_1763069950423_z7bmx7",
       "analytics": {
         "totalConversations": 0,
         "totalMessages": 0,

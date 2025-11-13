@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { WidgetConfig, Message, VoiceState } from '@/types/widget'
 import { MessageSquare, X, Mic, MicOff, Send, Volume2, VolumeX, Bot, User, Settings } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -71,13 +71,23 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const toggleWidget = () => {
+  const toggleWidget = useCallback(() => {
     const newState = !isOpen
     setIsOpen(newState)
     onToggle?.(newState)
-  }
+  }, [isOpen, onToggle])
 
-  const handleSendMessage = async (content: string, type: 'text' | 'voice' = 'text') => {
+  const handleSendMessage = useCallback(async (content: string, type: 'text' | 'voice' = 'text') => {
+    console.log('🎯 ChatWidget.handleSendMessage called with:', {
+      content,
+      type,
+      isPreview,
+      currentConfig: currentConfig?.defaultTextModel,
+      ragEnabled: currentConfig?.ragEnabled,
+      chatbotId,
+      ragCorpusId: currentConfig?.ragCorpusId
+    })
+
     if (!content.trim()) return
 
     const userMessage: Message = {
@@ -89,18 +99,31 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
     }
 
     setMessages(prev => [...prev, userMessage])
+    console.log('🗑️ Clearing input value and setting loading to true')
     setInputValue('')
     setIsLoading(true)
 
     try {
+      console.log('📞 About to call processMessage with params:', {
+        message: content,
+        model: currentConfig?.defaultTextModel || 'gpt',
+        ragEnabled: currentConfig?.ragEnabled || true,
+        chatbotId: chatbotId || 'default',
+        corpusId: currentConfig?.ragCorpusId,
+        isPreview
+      })
+
       // Process message with RAG and selected model
       const response = await processMessage(
         content,
         currentConfig?.defaultTextModel || 'gpt',
         currentConfig?.ragEnabled || true,
         chatbotId || 'default', // Pass chatbot ID
-        currentConfig?.ragCorpusId // Pass corpus ID for RAG
+        currentConfig?.ragCorpusId, // Pass corpus ID for RAG
+        isPreview // Pass preview mode flag
       )
+
+      console.log('📨 Received response from processMessage:', response)
 
       const assistantMessage: Message = {
         id: uuidv4(),
@@ -129,11 +152,12 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
+      console.log('✅ Setting loading to false, re-enabling input')
       setIsLoading(false)
     }
-  }
+  }, [currentConfig?.defaultTextModel, currentConfig?.ragEnabled, currentConfig?.ragCorpusId, currentConfig?.voiceEnabled, currentConfig?.autoPlayResponses, chatbotId, isPreview])
 
-  const handleVoiceInput = async () => {
+  const handleVoiceInput = useCallback(async () => {
     if (voiceState.isRecording) {
       // Stop recording
       if (recognitionRef.current) {
@@ -152,9 +176,9 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
       }
       setVoiceState(prev => ({ ...prev, isRecording: false }))
     }
-  }
+  }, [voiceState.isRecording])
 
-  const handlePlayVoice = async (text: string) => {
+  const handlePlayVoice = useCallback(async (text: string) => {
     try {
       setVoiceState(prev => ({ ...prev, isSpeaking: true }))
       const audioUrl = await synthesizeSpeech(text, voiceState.currentEngine, {
@@ -173,39 +197,35 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
     } finally {
       setVoiceState(prev => ({ ...prev, isSpeaking: false }))
     }
-  }
+  }, [voiceState.currentEngine, voiceState.speed, voiceState.volume, currentConfig])
 
-  const handleConfigUpdate = (updates: Partial<WidgetConfig>) => {
+  const handleConfigUpdate = useCallback((updates: Partial<WidgetConfig>) => {
     setCurrentConfig(prev => ({ ...prev, ...updates }))
-  }
+  }, [])
 
-  const getWidgetPosition = () => {
+  const handleInputChange = useCallback((value: string) => {
+    setInputValue(value)
+  }, [])
+
+  const getWidgetPosition = useMemo(() => {
     const positions = {
       'bottom-right': 'bottom-4 right-4',
       'bottom-left': 'bottom-4 left-4',
       'top-right': 'top-4 right-4',
-      'top-left': 'top-4 left-4'
+      'top-left': 'top-4 left-4',
+      'center': 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'
     }
     return positions[currentConfig?.position || 'bottom-right']
-  }
+  }, [currentConfig?.position])
 
-  const getWidgetSize = () => {
+  const getWidgetSize = useMemo(() => {
     const sizes = {
       small: 'w-80 h-[500px]',
       medium: 'w-96 h-[600px]',
       large: 'w-[450px] h-[700px]'
     }
     return sizes[currentConfig?.size || 'medium']
-  }
-
-  if (currentConfig?.displayMode === 'inline') {
-    return (
-      <div className={`${getWidgetSize()} flex flex-col bg-white rounded-xl shadow-xl overflow-hidden`}>
-        {/* Inline widget content */}
-        <ChatContent />
-      </div>
-    )
-  }
+  }, [currentConfig?.size])
 
   const ChatContent = () => (
     <>
@@ -281,7 +301,7 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
       {/* Input */}
       <MessageInput
         value={inputValue}
-        onChange={setInputValue}
+        onChange={handleInputChange}
         onSend={() => handleSendMessage(inputValue)}
         onVoiceInput={handleVoiceInput}
         isLoading={isLoading}
@@ -295,6 +315,15 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
     </>
   )
 
+  if (currentConfig?.displayMode === 'inline') {
+    return (
+      <div className={`${getWidgetSize} flex flex-col bg-white rounded-xl shadow-xl overflow-hidden`}>
+        {/* Inline widget content */}
+        <ChatContent />
+      </div>
+    )
+  }
+
   return (
     <>
       {/* Floating Action Button */}
@@ -305,7 +334,7 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             onClick={toggleWidget}
-            className={`fixed ${getWidgetPosition()} p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50`}
+            className={`fixed ${getWidgetPosition} p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50`}
             style={{ 
               background: `linear-gradient(135deg, ${currentConfig?.theme?.primaryColor || '#3b82f6'}, ${currentConfig?.theme?.secondaryColor || '#8b5cf6'})` 
             }}
@@ -325,7 +354,7 @@ export default function ChatWidget({ config, chatbotId, isPreview = false, onTog
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className={`fixed ${getWidgetPosition()} ${getWidgetSize()} flex flex-col bg-white rounded-xl shadow-2xl overflow-hidden z-50`}
+            className={`fixed ${getWidgetPosition} ${getWidgetSize} flex flex-col bg-white rounded-xl shadow-2xl overflow-hidden z-50`}
             style={{ backgroundColor: currentConfig?.theme?.backgroundColor || '#ffffff' }}
           >
             <ChatContent />
